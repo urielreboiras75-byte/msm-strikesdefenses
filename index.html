@@ -152,14 +152,14 @@
 
   .player-skin-banner {
     position: absolute;
-    right: -8px;
-    bottom: -18px;
-    height: 175%;
+    top: 0;
+    right: 0;
+    height: 100%;
     width: auto;
-    opacity: 0.16;
+    opacity: 0.22;
     pointer-events: none;
-    -webkit-mask-image: linear-gradient(to left, black 30%, transparent 82%);
-    mask-image: linear-gradient(to left, black 30%, transparent 82%);
+    -webkit-mask-image: linear-gradient(to left, black 55%, transparent 100%);
+    mask-image: linear-gradient(to left, black 55%, transparent 100%);
     z-index: 0;
   }
 
@@ -169,20 +169,14 @@
   }
 
   .region-divider {
-    padding: 10px 16px 2px;
+    display: inline-block;
+    margin: 10px 16px 6px;
+    padding: 2px 9px;
+    border-radius: 999px;
     font-size: 10px;
     font-weight: 700;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     text-transform: uppercase;
-    color: var(--text-muted);
-    border-top: 1px solid var(--card-border);
-    margin-top: 4px;
-  }
-
-  .tier-header + .region-divider,
-  .region-divider + .player-row {
-    border-top: none;
-    margin-top: 0;
   }
 
   .player-main {
@@ -267,6 +261,14 @@
     HT1: "var(--tier-ht1)"
   };
   const REGION_ORDER = ["NA", "EU", "AS", "SA", "ME", "AU"];
+  const REGION_STYLES = {
+    NA: { bg: "#58303e", text: "#f06472" },
+    EU: { bg: "#235743", text: "#4ade80" },
+    AS: { bg: "#483b6a", text: "#c084fc" },
+    SA: { bg: "#33546a", text: "#7dd3fc" },
+    ME: { bg: "#5b5221", text: "#facc15" },
+    AU: { bg: "#4a4540", text: "#c6a477" }
+  };
 
   function regionRank(region) {
     const idx = REGION_ORDER.indexOf((region || '').toUpperCase());
@@ -340,6 +342,9 @@
             const divider = document.createElement('div');
             divider.className = 'region-divider';
             divider.textContent = region;
+            const style = REGION_STYLES[region] || { bg: 'var(--card)', text: 'var(--text-muted)' };
+            divider.style.background = style.bg;
+            divider.style.color = style.text;
             col.appendChild(divider);
             lastRegion = region;
           }
