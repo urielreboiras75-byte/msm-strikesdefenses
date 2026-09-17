@@ -187,7 +187,11 @@
   }
 
   .player-row.status-pending {
-    background: rgba(207, 226, 243, 0.07);
+    background: rgba(207, 226, 243, 0.14);
+  }
+
+  .player-row.status-loa {
+    background: rgba(244, 204, 204, 0.14);
   }
 
   .player-main, .player-meta {
@@ -195,10 +199,9 @@
     z-index: 1;
   }
 
-  .region-divider {
-    display: inline-block;
-    margin: 12px 16px 8px;
-    padding: 2px 9px;
+  .region-tag {
+    display: inline-flex;
+    padding: 1px 7px;
     border-radius: 999px;
     font-size: 10px;
     font-weight: 700;
@@ -267,9 +270,9 @@
   <p id="status-line"></p>
   <div class="status-legend">
     <span style="background:transparent; color:var(--text-muted);">Available</span>
-    <span style="background:rgba(255,242,204,0.12); color:#f5dd7a;">Testing</span>
-    <span style="background:rgba(244,204,204,0.12); color:#f2a8a8;">LOA</span>
-    <span style="background:rgba(207,226,243,0.12); color:#a8cdf2;">Pending</span>
+    <span style="background:rgba(255,242,204,0.24); color:#f5dd7a;">Testing</span>
+    <span style="background:rgba(244,204,204,0.24); color:#f2a8a8;">LOA</span>
+    <span style="background:rgba(207,226,243,0.24); color:#a8cdf2;">Pending</span>
   </div>
   <div id="tiers-container">
     <p class="loading">Loading data...</p>
@@ -286,6 +289,8 @@
     SPM: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRbVTBEHcvVLldMXIilLqUS-BURqM7OwFZZopsaHYAesAB_dOWEW85FkJMYmgmKYBLWs8D40m-UeZjl/pub?gid=1180228026&single=true&output=csv"
   };
 
+  const LOA_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRbVTBEHcvVLldMXIilLqUS-BURqM7OwFZZopsaHYAesAB_dOWEW85FkJMYmgmKYBLWs8D40m-UeZjl/pub?gid=562433624&single=true&output=csv";
+
   const TIERS = ["LT2", "HT2", "LT1", "HT1"];
   const TIER_COLOR_VARS = {
     LT2: "var(--tier-lt2)",
@@ -295,13 +300,39 @@
   };
   const REGION_ORDER = ["NA", "EU", "AS", "SA", "ME", "AU"];
   const REGION_STYLES = {
-    NA: { bg: "#58303e", text: "#f06472" },
-    EU: { bg: "#235743", text: "#4ade80" },
-    AS: { bg: "#483b6a", text: "#c084fc" },
-    SA: { bg: "#33546a", text: "#7dd3fc" },
-    ME: { bg: "#5b5221", text: "#facc15" },
-    AU: { bg: "#4a4540", text: "#c6a477" }
+    NA: { bg: "rgba(88, 48, 62, 0.55)", text: "#f06472" },
+    EU: { bg: "rgba(35, 87, 67, 0.55)", text: "#4ade80" },
+    AS: { bg: "rgba(72, 59, 106, 0.55)", text: "#c084fc" },
+    SA: { bg: "rgba(51, 84, 106, 0.55)", text: "#7dd3fc" },
+    ME: { bg: "rgba(91, 82, 33, 0.55)", text: "#facc15" },
+    AU: { bg: "rgba(74, 69, 64, 0.55)", text: "#c6a477" }
   };
+
+  let loaSet = new Set();
+
+  async function refreshLOA() {
+    try {
+      const res = await fetch(LOA_SHEET_URL, { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const text = await res.text();
+      const rows = Papa.parse(text.trim(), { skipEmptyLines: false }).data;
+      const newSet = new Set();
+      // Columnas: DiscordID, IGN, Inicio, Fin, MarkedFrom, ColoresPrevios
+      // Solo cuenta como "en LOA" si tiene IGN y la columna Fin está vacía.
+      for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        if (!row) continue;
+        const ign = (row[1] || '').trim();
+        const fin = (row[3] || '').trim();
+        if (ign && !fin) {
+          newSet.add(ign.toLowerCase());
+        }
+      }
+      loaSet = newSet;
+    } catch (err) {
+      console.error('LOA fetch failed', err);
+    }
+  }
 
   function regionRank(region) {
     const idx = REGION_ORDER.indexOf((region || '').toUpperCase());
