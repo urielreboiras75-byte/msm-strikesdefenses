@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MSM Strikes & Defenses</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<style>
+  :root {
+    --bg: #0a0f1c;
+    --bg-elevated: #0f1626;
+    --card: #131c30;
+    --card-border: #212d47;
+    --text: #e7ecf5;
+    --text-muted: #8492ac;
+    --accent: #2dd4bf;
+    --accent-dim: #14504a;
+
+    --tier-lt2: #64748b;
+    --tier-ht2: #38bdf8;
+    --tier-lt1: #b478f5;
+    --tier-ht1: #eab308;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    background-image:
+      radial-gradient(circle at 15% 0%, rgba(45, 212, 191, 0.07), transparent 40%),
+      radial-gradient(circle at 85% 10%, rgba(180, 120, 245, 0.06), transparent 35%);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    min-height: 100vh;
+  }
+
+  header {
+    text-align: center;
+    padding: 48px 20px 28px;
+  }
+
+  .logo {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(20px, 4vw, 34px);
+    letter-spacing: 2px;
+    line-height: 1.6;
+  }
+  .logo .msm { color: var(--text); }
+  .logo .sub { color: var(--accent); }
+
+  .tagline {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-top: 10px;
+  }
+
+  nav.mode-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    padding: 0 16px 8px;
+  }
+
+  .mode-tab {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text-muted);
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 10px 18px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+  }
+
+  .mode-tab:hover {
+    color: var(--text);
+    border-color: var(--accent-dim);
+  }
+
+  .mode-tab.active {
+    color: #06201c;
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  main {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 32px 20px 80px;
+  }
+
+  #status-line {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 12px;
+    margin-bottom: 24px;
+    min-height: 16px;
+  }
+
+  #tiers-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    align-items: start;
+  }
+
+  @media (max-width: 900px) {
+    #tiers-container { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 560px) {
+    #tiers-container { grid-template-columns: 1fr; }
+  }
+
+  .tier-column {
+    background: var(--bg-elevated);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .tier-header {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px;
+    padding: 14px 16px;
+    color: #06201c;
+    background: var(--tier-color, var(--accent));
+  }
+
+  .player-row {
+    padding: 12px 16px;
+    border-top: 1px solid var(--card-border);
+  }
+
+  .player-row:first-of-type {
+    border-top: none;
+  }
+
+  .player-main {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .peak-badge {
+    font-size: 10px;
+    font-weight: 700;
+    color: #06201c;
+    background: var(--tier-color, var(--accent));
+    border-radius: 4px;
+    padding: 1px 6px;
+  }
+
+  .player-meta {
+    display: flex;
+    gap: 12px;
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .empty-row {
+    padding: 16px;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-style: italic;
+  }
+
+  .loading, .error {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 40px 0;
+    grid-column: 1 / -1;
+  }
+  .error { color: #f87171; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><span class="msm">MSM</span> <span class="sub">STRIKES</span></div>
+  <p class="tagline">Rankings en vivo de Mace Submodes — actualizado desde el spreadsheet oficial</p>
+</header>
+
+<nav class="mode-tabs" id="mode-tabs">
+  <button class="mode-tab active" data-mode="LT">LT Mace</button>
+  <button class="mode-tab" data-mode="HT">HT Mace</button>
+  <button class="mode-tab" data-mode="RK">Rocket Mace</button>
+  <button class="mode-tab" data-mode="OG">OG Mace</button>
+  <button class="mode-tab" data-mode="RD">Rod Mace</button>
+  <button class="mode-tab" data-mode="SPM">Spear Mace</button>
+</nav>
+
+<main>
+  <p id="status-line"></p>
+  <div id="tiers-container">
+    <p class="loading">Cargando datos...</p>
+  </div>
+</main>
+
+<script>
+  const SHEETS = {
+    LT:  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRbVTBEHcvVLldMXIilLqUS-BURqM7OwFZZopsaHYAesAB_dOWEW85FkJMYmgmKYBLWs8D40m-UeZjl/pub?gid=0&single=true&output=csv",
+    HT:  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRbVTBEHcvVLldMXIilLqUS-BURqM7OwFZZopsaHYAesAB_dOWEW85FkJMYmgmKYBLWs8D40m-UeZjl/pub?gid=1439486243&single=true&output=csv",
+    RK:  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRbVTBEHcvVLldMXIilLqUS-BURqM7OwFZZopsaHYAesAB_dOWEW85FkJMYmgmKYBLWs8D40m-UeZjl/pub?gid=1367025291&single=true&output=csv",
+    OG:  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRbVTBEHcvVLldMXIilLqUS-BURqM7OwFZZopsaHYAesAB_dOWEW85FkJMYmgmKYBLWs8D40m-UeZjl/pub?gid=1995941653&single=true&output=csv",
+    RD:  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRbVTBEHcvVLldMXIilLqUS-BURqM7OwFZZopsaHYAesAB_dOWEW85FkJMYmgmKYBLWs8D40m-UeZjl/pub?gid=1523377691&single=true&output=csv",
+    SPM: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRbVTBEHcvVLldMXIilLqUS-BURqM7OwFZZopsaHYAesAB_dOWEW85FkJMYmgmKYBLWs8D40m-UeZjl/pub?gid=1180228026&single=true&output=csv"
+  };
+
+  const TIERS = ["LT2", "HT2", "LT1", "HT1"];
+  const TIER_COLOR_VARS = {
+    LT2: "var(--tier-lt2)",
+    HT2: "var(--tier-ht2)",
+    LT1: "var(--tier-lt1)",
+    HT1: "var(--tier-ht1)"
+  };
+
+  const container = document.getElementById('tiers-container');
+  const statusLine = document.getElementById('status-line');
+  let currentMode = 'LT';
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str == null ? '' : str;
+    return div.innerHTML;
+  }
+
+  // Toma el texto CSV crudo de una pestaña y devuelve los jugadores agrupados por tier.
+  // Las columnas 0-23 son los 4 bloques (LT2, HT2, LT1, HT1) de 6 columnas cada uno.
+  // Se corta al llegar a la fila "Available" (ahí empieza la leyenda/tablas auxiliares).
+  function parseSheet(csvText) {
+    const rows = Papa.parse(csvText.trim(), { skipEmptyLines: false }).data;
+    const result = { LT2: [], HT2: [], LT1: [], HT1: [] };
+
+    for (let i = 2; i < rows.length; i++) {
+      const row = rows[i];
+      if (!row) continue;
+
+      const firstCell = (row[0] || '').trim().toLowerCase();
+      if (firstCell === 'available') break;
+
+      TIERS.forEach((tier, idx) => {
+        const base = idx * 6;
+        const ign = (row[base] || '').trim();
+        if (!ign) return;
+        result[tier].push({
+          ign,
+          region: (row[base + 1] || '').trim(),
+          strikes: (row[base + 2] || '').trim(),
+          defenses: (row[base + 3] || '').trim(),
+          discord: (row[base + 4] || '').trim(),
+          peak: (row[base + 5] || '').trim()
+        });
+      });
+    }
+    return result;
+  }
+
+  function renderTiers(data) {
+    container.innerHTML = '';
+    TIERS.forEach(tier => {
+      const col = document.createElement('div');
+      col.className = 'tier-column';
+      col.style.setProperty('--tier-color', TIER_COLOR_VARS[tier]);
+
+      const header = document.createElement('div');
+      header.className = 'tier-header';
+      header.textContent = tier;
+      col.appendChild(header);
+
+      const players = data[tier];
+      if (players.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'empty-row';
+        empty.textContent = 'Sin jugadores';
+        col.appendChild(empty);
+      } else {
+        players.forEach(p => {
+          const row = document.createElement('div');
+          row.className = 'player-row';
+          row.innerHTML = `
+            <div class="player-main">
+              <span>${escapeHtml(p.ign)}</span>
+              ${p.peak ? '<span class="peak-badge">PEAK</span>' : ''}
+            </div>
+            <div class="player-meta">
+              <span>${escapeHtml(p.region || '—')}</span>
+              <span>${escapeHtml(p.strikes || '0 / 8')} strikes</span>
+              <span>${escapeHtml(p.defenses || '0')} def</span>
+            </div>
+          `;
+          col.appendChild(row);
+        });
+      }
+
+      container.appendChild(col);
+    });
+  }
+
+  async function loadMode(modeKey) {
+    currentMode = modeKey;
+    container.innerHTML = '<p class="loading">Cargando datos...</p>';
+    statusLine.textContent = '';
+    try {
+      const res = await fetch(SHEETS[modeKey], { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const text = await res.text();
+      const data = parseSheet(text);
+      renderTiers(data);
+      statusLine.textContent = 'Última actualización: ' + new Date().toLocaleTimeString('es-AR');
+    } catch (err) {
+      container.innerHTML = '<p class="error">No se pudieron cargar los datos. Probá de nuevo en un momento.</p>';
+      statusLine.textContent = '';
+      console.error(err);
+    }
+  }
+
+  document.querySelectorAll('.mode-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.mode-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      loadMode(btn.dataset.mode);
+    });
+  });
+
+  loadMode(currentMode);
+
+  // Refresca los datos solos cada 60 segundos para que se vea "en vivo".
+  setInterval(() => loadMode(currentMode), 60000);
+</script>
+
+</body>
+</html>
