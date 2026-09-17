@@ -463,12 +463,12 @@
               <span>${escapeHtml(p.ign)}</span>
               ${p.peak ? '<span class="peak-badge">PEAK</span>' : ''}
             </div>
-            ${p.discord ? `<div class="player-id">ID: ${escapeHtml(p.discord)}</div>` : ''}
             <div class="player-meta">
               <span class="region-tag" style="background:${regionStyle.bg};color:${regionStyle.text};">${escapeHtml(region)}</span>
               <span>${escapeHtml(p.strikes || '0 / 8')} strikes</span>
               <span>${escapeHtml(p.defenses || '0')} def</span>
             </div>
+            ${p.discord ? `<div class="player-id">ID: ${escapeHtml(p.discord)}</div>` : ''}
           `;
           col.appendChild(row);
         });
