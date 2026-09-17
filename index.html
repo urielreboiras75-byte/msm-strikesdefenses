@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,8 +20,8 @@
     --accent-dim: #14504a;
 
     --tier-lt2: #64748b;
-    --tier-ht2: #38bdf8;
-    --tier-lt1: #b478f5;
+    --tier-ht2: #9dbdbd;
+    --tier-lt1: #8c7c35;
     --tier-ht1: #eab308;
   }
 
@@ -45,12 +45,13 @@
 
   .logo {
     font-family: 'Press Start 2P', monospace;
-    font-size: clamp(20px, 4vw, 34px);
+    font-size: clamp(40px, 8vw, 68px);
     letter-spacing: 2px;
     line-height: 1.6;
+    text-shadow: 0 4px 0 rgba(0, 0, 0, 0.5), 0 10px 24px rgba(0, 0, 0, 0.55);
   }
   .logo .msm { color: var(--text); }
-  .logo .sub { color: var(--accent); }
+  .logo .sub { color: var(--accent); text-shadow: 0 4px 0 rgba(0, 0, 0, 0.5), 0 0 24px rgba(45, 212, 191, 0.45), 0 10px 24px rgba(0, 0, 0, 0.55); }
 
   .tagline {
     color: var(--text-muted);
@@ -67,6 +68,9 @@
   }
 
   .mode-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     font-family: 'Inter', sans-serif;
     font-weight: 600;
     font-size: 13px;
@@ -77,6 +81,12 @@
     padding: 10px 18px;
     cursor: pointer;
     transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+  }
+
+  .mode-icon {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
   }
 
   .mode-tab:hover {
@@ -138,8 +148,21 @@
     border-top: 1px solid var(--card-border);
   }
 
-  .player-row:first-of-type {
+  .region-divider {
+    padding: 10px 16px 2px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    border-top: 1px solid var(--card-border);
+    margin-top: 4px;
+  }
+
+  .tier-header + .region-divider,
+  .region-divider + .player-row {
     border-top: none;
+    margin-top: 0;
   }
 
   .player-main {
@@ -187,22 +210,22 @@
 
 <header>
   <div class="logo"><span class="msm">MSM</span> <span class="sub">STRIKES</span></div>
-  <p class="tagline">Rankings en vivo de Mace Submodes — actualizado desde el spreadsheet oficial</p>
+  <p class="tagline">Live rankings for Mace Submodes — updated straight from the official spreadsheet</p>
 </header>
 
 <nav class="mode-tabs" id="mode-tabs">
-  <button class="mode-tab active" data-mode="LT">LT Mace</button>
-  <button class="mode-tab" data-mode="HT">HT Mace</button>
-  <button class="mode-tab" data-mode="RK">Rocket Mace</button>
-  <button class="mode-tab" data-mode="OG">OG Mace</button>
-  <button class="mode-tab" data-mode="RD">Rod Mace</button>
-  <button class="mode-tab" data-mode="SPM">Spear Mace</button>
+  <button class="mode-tab active" data-mode="LT"><img class="mode-icon" src="https://cdn.discordapp.com/emojis/1305399436708544512.webp?size=96" alt="">LT Mace</button>
+  <button class="mode-tab" data-mode="HT"><img class="mode-icon" src="https://cdn.discordapp.com/emojis/1537148726638936194.webp?size=96" alt="">HT Mace</button>
+  <button class="mode-tab" data-mode="RK"><img class="mode-icon" src="https://cdn.discordapp.com/emojis/1537148662667415553.webp?size=96" alt="">Rocket Mace</button>
+  <button class="mode-tab" data-mode="OG"><img class="mode-icon" src="https://cdn.discordapp.com/emojis/1305399676630994994.webp?size=96" alt="">OG Mace</button>
+  <button class="mode-tab" data-mode="RD"><img class="mode-icon" src="https://cdn.discordapp.com/emojis/1537148680597938278.webp?size=96" alt="">Rod Mace</button>
+  <button class="mode-tab" data-mode="SPM"><img class="mode-icon" src="https://cdn.discordapp.com/emojis/1463390685972660288.webp?size=96" alt="">Spear Mace</button>
 </nav>
 
 <main>
   <p id="status-line"></p>
   <div id="tiers-container">
-    <p class="loading">Cargando datos...</p>
+    <p class="loading">Loading data...</p>
   </div>
 </main>
 
@@ -223,6 +246,12 @@
     LT1: "var(--tier-lt1)",
     HT1: "var(--tier-ht1)"
   };
+  const REGION_ORDER = ["NA", "EU", "AS", "SA", "ME", "AU"];
+
+  function regionRank(region) {
+    const idx = REGION_ORDER.indexOf((region || '').toUpperCase());
+    return idx === -1 ? REGION_ORDER.length : idx;
+  }
 
   const container = document.getElementById('tiers-container');
   const statusLine = document.getElementById('status-line');
@@ -277,14 +306,23 @@
       header.textContent = tier;
       col.appendChild(header);
 
-      const players = data[tier];
+      const players = data[tier].slice().sort((a, b) => regionRank(a.region) - regionRank(b.region));
       if (players.length === 0) {
         const empty = document.createElement('div');
         empty.className = 'empty-row';
-        empty.textContent = 'Sin jugadores';
+        empty.textContent = 'No players';
         col.appendChild(empty);
       } else {
+        let lastRegion = null;
         players.forEach(p => {
+          const region = (p.region || 'Unknown').toUpperCase();
+          if (region !== lastRegion) {
+            const divider = document.createElement('div');
+            divider.className = 'region-divider';
+            divider.textContent = region;
+            col.appendChild(divider);
+            lastRegion = region;
+          }
           const row = document.createElement('div');
           row.className = 'player-row';
           row.innerHTML = `
@@ -293,7 +331,6 @@
               ${p.peak ? '<span class="peak-badge">PEAK</span>' : ''}
             </div>
             <div class="player-meta">
-              <span>${escapeHtml(p.region || '—')}</span>
               <span>${escapeHtml(p.strikes || '0 / 8')} strikes</span>
               <span>${escapeHtml(p.defenses || '0')} def</span>
             </div>
@@ -308,7 +345,7 @@
 
   async function loadMode(modeKey) {
     currentMode = modeKey;
-    container.innerHTML = '<p class="loading">Cargando datos...</p>';
+    container.innerHTML = '<p class="loading">Loading data...</p>';
     statusLine.textContent = '';
     try {
       const res = await fetch(SHEETS[modeKey], { cache: 'no-store' });
@@ -316,9 +353,9 @@
       const text = await res.text();
       const data = parseSheet(text);
       renderTiers(data);
-      statusLine.textContent = 'Última actualización: ' + new Date().toLocaleTimeString('es-AR');
+      statusLine.textContent = 'Last updated: ' + new Date().toLocaleTimeString('en-US');
     } catch (err) {
-      container.innerHTML = '<p class="error">No se pudieron cargar los datos. Probá de nuevo en un momento.</p>';
+      container.innerHTML = '<p class="error">Couldn\'t load the data. Please try again in a moment.</p>';
       statusLine.textContent = '';
       console.error(err);
     }
