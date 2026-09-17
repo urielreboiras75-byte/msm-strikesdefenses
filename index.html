@@ -153,14 +153,14 @@
   .player-skin-banner {
     position: absolute;
     top: 50%;
-    right: 0;
-    height: 100px;
+    right: -6px;
+    height: 155px;
     width: auto;
     transform: translateY(-50%);
-    opacity: 0.22;
+    opacity: 0.24;
     pointer-events: none;
-    -webkit-mask-image: linear-gradient(to left, black 55%, transparent 100%);
-    mask-image: linear-gradient(to left, black 55%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to left, black 60%, transparent 100%);
+    mask-image: linear-gradient(to left, black 60%, transparent 100%);
     z-index: 0;
   }
 
@@ -352,7 +352,7 @@
           const row = document.createElement('div');
           row.className = 'player-row';
           row.innerHTML = `
-            <img class="player-skin-banner" src="https://vzge.me/full/300/${encodeURIComponent(p.ign)}" alt="" loading="lazy" onerror="this.remove()">
+            <img class="player-skin-banner" src="https://vzge.me/bust/400/${encodeURIComponent(p.ign)}" alt="" loading="lazy" onerror="this.remove()">
             <div class="player-main">
               <span>${escapeHtml(p.ign)}</span>
               ${p.peak ? '<span class="peak-badge">PEAK</span>' : ''}
