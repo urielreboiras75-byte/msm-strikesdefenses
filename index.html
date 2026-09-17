@@ -186,6 +186,10 @@
     z-index: 0;
   }
 
+  .player-row.status-pending {
+    background: rgba(207, 226, 243, 0.07);
+  }
+
   .player-main, .player-meta {
     position: relative;
     z-index: 1;
@@ -332,13 +336,17 @@
         const base = idx * 6;
         const ign = (row[base] || '').trim();
         if (!ign) return;
+        const strikes = (row[base + 2] || '').trim();
+        const strikesNum = parseInt(strikes, 10);
+        const isPending = !isNaN(strikesNum) && strikesNum < 0;
         result[tier].push({
           ign,
           region: (row[base + 1] || '').trim(),
-          strikes: (row[base + 2] || '').trim(),
+          strikes,
           defenses: (row[base + 3] || '').trim(),
           discord: (row[base + 4] || '').trim(),
-          peak: (row[base + 5] || '').trim()
+          peak: (row[base + 5] || '').trim(),
+          isPending
         });
       });
     }
@@ -378,7 +386,7 @@
             lastRegion = region;
           }
           const row = document.createElement('div');
-          row.className = 'player-row';
+          row.className = 'player-row' + (p.isPending ? ' status-pending' : '');
           row.innerHTML = `
             <img class="player-skin-banner" src="https://vzge.me/bust/400/${encodeURIComponent(p.ign)}" alt="" loading="lazy" onerror="this.remove()">
             <div class="player-main">
