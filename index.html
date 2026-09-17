@@ -95,9 +95,9 @@
   }
 
   .mode-tab.active {
-    color: #06201c;
-    background: var(--accent);
-    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(45, 212, 191, 0.16);
+    border-color: rgba(45, 212, 191, 0.5);
   }
 
   main {
@@ -110,8 +110,28 @@
     text-align: center;
     color: var(--text-muted);
     font-size: 12px;
-    margin-bottom: 24px;
+    margin-bottom: 12px;
     min-height: 16px;
+  }
+
+  .status-legend {
+    display: flex;
+    justify-content: center;
+    max-width: 460px;
+    margin: 0 auto 28px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .status-legend span {
+    flex: 1;
+    text-align: center;
+    padding: 6px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #1f1f1f;
+    white-space: nowrap;
   }
 
   #tiers-container {
@@ -188,7 +208,7 @@
     align-items: center;
     gap: 8px;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 21px;
   }
 
   .peak-badge {
@@ -242,6 +262,12 @@
 
 <main>
   <p id="status-line"></p>
+  <div class="status-legend">
+    <span style="background:#ffffff;">Available</span>
+    <span style="background:#fff2cc;">Testing</span>
+    <span style="background:#f4cccc;">Inactive (LOA)</span>
+    <span style="background:#cfe2f3;">Pending</span>
+  </div>
   <div id="tiers-container">
     <p class="loading">Loading data...</p>
   </div>
