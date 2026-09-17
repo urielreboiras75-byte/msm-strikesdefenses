@@ -20,7 +20,7 @@
     --accent-dim: #14504a;
 
     --tier-lt2: #64748b;
-    --tier-ht2: #a8b4b5;
+    --tier-ht2: #c7d4d2;
     --tier-lt1: #8c7c35;
     --tier-ht1: #eab308;
   }
@@ -43,15 +43,24 @@
     padding: 48px 20px 28px;
   }
 
-  .logo {
+  .logo-main {
     font-family: 'Press Start 2P', monospace;
     font-size: clamp(40px, 8vw, 68px);
     letter-spacing: 2px;
-    line-height: 1.6;
+    line-height: 1.4;
+    color: var(--text);
     text-shadow: 0 4px 0 rgba(0, 0, 0, 0.5), 0 10px 24px rgba(0, 0, 0, 0.55);
   }
-  .logo .msm { color: var(--text); }
-  .logo .sub { color: var(--accent); text-shadow: 0 4px 0 rgba(0, 0, 0, 0.5), 0 0 24px rgba(45, 212, 191, 0.45), 0 10px 24px rgba(0, 0, 0, 0.55); }
+
+  .logo-sub {
+    font-family: 'Press Start 2P', monospace;
+    font-size: calc(clamp(40px, 8vw, 68px) * 0.75);
+    letter-spacing: 2px;
+    line-height: 1.4;
+    margin-top: 10px;
+    color: var(--accent);
+    text-shadow: 0 4px 0 rgba(0, 0, 0, 0.5), 0 0 24px rgba(45, 212, 191, 0.45), 0 10px 24px rgba(0, 0, 0, 0.55);
+  }
 
   .tagline {
     color: var(--text-muted);
@@ -168,7 +177,7 @@
     padding: 12px 16px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     border-bottom: 1px solid var(--card-border);
     overflow: hidden;
   }
@@ -238,7 +247,8 @@
     font-size: 10px;
     color: var(--text-muted);
     opacity: 0.75;
-    margin-top: 2px;
+    margin-top: auto;
+    padding-top: 8px;
   }
 
   .empty-row {
@@ -260,7 +270,8 @@
 <body>
 
 <header>
-  <div class="logo"><span class="msm">MSM</span> <span class="sub">STRIKES</span></div>
+  <div class="logo-main">Mace Submodes</div>
+  <div class="logo-sub">Strikes &amp; Defenses</div>
   <p class="tagline">Live rankings for Mace Submodes — updated straight from the official spreadsheet</p>
 </header>
 
@@ -307,12 +318,12 @@
   };
   const REGION_ORDER = ["NA", "EU", "AS", "SA", "ME", "AU"];
   const REGION_STYLES = {
-    NA: { bg: "rgba(88, 48, 62, 0.55)", text: "#f06472" },
-    EU: { bg: "rgba(35, 87, 67, 0.55)", text: "#4ade80" },
-    AS: { bg: "rgba(72, 59, 106, 0.55)", text: "#c084fc" },
-    SA: { bg: "rgba(51, 84, 106, 0.55)", text: "#7dd3fc" },
-    ME: { bg: "rgba(91, 82, 33, 0.55)", text: "#facc15" },
-    AU: { bg: "rgba(74, 69, 64, 0.55)", text: "#c6a477" }
+    NA: { bg: "rgba(88, 48, 62, 0.35)", text: "#f06472" },
+    EU: { bg: "rgba(35, 87, 67, 0.35)", text: "#4ade80" },
+    AS: { bg: "rgba(72, 59, 106, 0.35)", text: "#c084fc" },
+    SA: { bg: "rgba(51, 84, 106, 0.35)", text: "#7dd3fc" },
+    ME: { bg: "rgba(91, 82, 33, 0.35)", text: "#facc15" },
+    AU: { bg: "rgba(74, 69, 64, 0.35)", text: "#c6a477" }
   };
 
   let loaSet = new Set();
@@ -478,20 +489,36 @@
     });
   }
 
+  async function fetchModeData(modeKey) {
+    const res = await fetch(SHEETS[modeKey], { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    return parseSheet(text);
+  }
+
   async function loadMode(modeKey) {
     currentMode = modeKey;
     container.innerHTML = '<p class="loading">Loading data...</p>';
     statusLine.textContent = '';
     try {
-      const res = await fetch(SHEETS[modeKey], { cache: 'no-store' });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const text = await res.text();
-      const data = parseSheet(text);
+      const data = await fetchModeData(modeKey);
       renderTiers(data);
       statusLine.textContent = 'Last updated: ' + new Date().toLocaleTimeString('en-US');
     } catch (err) {
       container.innerHTML = '<p class="error">Couldn\'t load the data. Please try again in a moment.</p>';
       statusLine.textContent = '';
+      console.error(err);
+    }
+  }
+
+  // Refresco silencioso: actualiza los datos sobre la marcha, sin borrar
+  // la pantalla ni mostrar el estado de "Loading..." (para que no parpadee).
+  async function refreshCurrentMode() {
+    try {
+      const data = await fetchModeData(currentMode);
+      renderTiers(data);
+      statusLine.textContent = 'Last updated: ' + new Date().toLocaleTimeString('en-US');
+    } catch (err) {
       console.error(err);
     }
   }
@@ -509,10 +536,11 @@
     loadMode(currentMode);
   })();
 
-  // Refresca los datos (y la lista de LOA) solos cada 60 segundos para que se vea "en vivo".
+  // Refresca los datos (y la lista de LOA) solos cada 60 segundos para que se
+  // vea "en vivo", sin parpadear la pantalla completa.
   setInterval(() => {
     refreshLOA();
-    loadMode(currentMode);
+    refreshCurrentMode();
   }, 60000);
 </script>
 
