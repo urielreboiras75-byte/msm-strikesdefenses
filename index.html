@@ -121,7 +121,7 @@
     margin: 0 auto 28px;
     border-radius: 6px;
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(157, 189, 208, 0.35);
   }
 
   .status-legend span {
@@ -130,7 +130,6 @@
     padding: 6px 8px;
     font-size: 11px;
     font-weight: 600;
-    color: #1f1f1f;
     white-space: nowrap;
   }
 
@@ -263,10 +262,10 @@
 <main>
   <p id="status-line"></p>
   <div class="status-legend">
-    <span style="background:#ffffff;">Available</span>
-    <span style="background:#fff2cc;">Testing</span>
-    <span style="background:#f4cccc;">Inactive (LOA)</span>
-    <span style="background:#cfe2f3;">Pending</span>
+    <span style="background:transparent; color:var(--text-muted);">Available</span>
+    <span style="background:rgba(255,242,204,0.12); color:#f5dd7a;">Testing</span>
+    <span style="background:rgba(244,204,204,0.12); color:#f2a8a8;">Inactive (LOA)</span>
+    <span style="background:rgba(207,226,243,0.12); color:#a8cdf2;">Pending</span>
   </div>
   <div id="tiers-container">
     <p class="loading">Loading data...</p>
