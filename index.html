@@ -144,8 +144,28 @@
   }
 
   .player-row {
+    position: relative;
     padding: 12px 16px;
     border-top: 1px solid var(--card-border);
+    overflow: hidden;
+  }
+
+  .player-skin-banner {
+    position: absolute;
+    right: -8px;
+    bottom: -18px;
+    height: 175%;
+    width: auto;
+    opacity: 0.16;
+    pointer-events: none;
+    -webkit-mask-image: linear-gradient(to left, black 30%, transparent 82%);
+    mask-image: linear-gradient(to left, black 30%, transparent 82%);
+    z-index: 0;
+  }
+
+  .player-main, .player-meta {
+    position: relative;
+    z-index: 1;
   }
 
   .region-divider {
@@ -326,6 +346,7 @@
           const row = document.createElement('div');
           row.className = 'player-row';
           row.innerHTML = `
+            <img class="player-skin-banner" src="https://vzge.me/full/300/${encodeURIComponent(p.ign)}" alt="" loading="lazy" onerror="this.remove()">
             <div class="player-main">
               <span>${escapeHtml(p.ign)}</span>
               ${p.peak ? '<span class="peak-badge">PEAK</span>' : ''}
