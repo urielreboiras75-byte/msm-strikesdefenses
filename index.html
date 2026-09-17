@@ -186,10 +186,6 @@
     z-index: 0;
   }
 
-  .player-row.status-pending {
-    background: rgba(207, 226, 243, 0.07);
-  }
-
   .player-main, .player-meta {
     position: relative;
     z-index: 1;
@@ -268,7 +264,7 @@
   <div class="status-legend">
     <span style="background:transparent; color:var(--text-muted);">Available</span>
     <span style="background:rgba(255,242,204,0.12); color:#f5dd7a;">Testing</span>
-    <span style="background:rgba(244,204,204,0.12); color:#f2a8a8;">LOA</span>
+    <span style="background:rgba(244,204,204,0.12); color:#f2a8a8;">Inactive (LOA)</span>
     <span style="background:rgba(207,226,243,0.12); color:#a8cdf2;">Pending</span>
   </div>
   <div id="tiers-container">
@@ -321,21 +317,16 @@
   // Toma el texto CSV crudo de una pestaña y devuelve los jugadores agrupados por tier.
   // Las columnas 0-23 son los 4 bloques (LT2, HT2, LT1, HT1) de 6 columnas cada uno.
   // Se corta al llegar a la fila "Available" (ahí empieza la leyenda/tablas auxiliares).
-  // Más abajo en la hoja hay sub-tablas "LT2 Pending" / "HT2 Pending" / "LT1 Pending"
-  // (HT1 no tiene) que listan a los jugadores marcados como pending, con su cantidad
-  // de strikes en ese momento. Un jugador cuenta como "pending" solo si aparece ahí
-  // Y su valor de strikes en esa sub-tabla es negativo.
   function parseSheet(csvText) {
     const rows = Papa.parse(csvText.trim(), { skipEmptyLines: false }).data;
     const result = { LT2: [], HT2: [], LT1: [], HT1: [] };
-    let cutoffIndex = rows.length;
 
     for (let i = 2; i < rows.length; i++) {
       const row = rows[i];
       if (!row) continue;
 
       const firstCell = (row[0] || '').trim().toLowerCase();
-      if (firstCell === 'available') { cutoffIndex = i; break; }
+      if (firstCell === 'available') break;
 
       TIERS.forEach((tier, idx) => {
         const base = idx * 6;
@@ -347,50 +338,9 @@
           strikes: (row[base + 2] || '').trim(),
           defenses: (row[base + 3] || '').trim(),
           discord: (row[base + 4] || '').trim(),
-          peak: (row[base + 5] || '').trim(),
-          isPending: false
+          peak: (row[base + 5] || '').trim()
         });
       });
-    }
-
-    // Buscar la fila "LT2 | Pending | ... | HT2 | Pending | ... | LT1 | Pending"
-    const PENDING_TIERS = ['LT2', 'HT2', 'LT1'];
-    let pendingHeaderIdx = -1;
-    for (let i = cutoffIndex; i < rows.length; i++) {
-      const row = rows[i];
-      if (!row) continue;
-      if ((row[0] || '').trim() === 'LT2' && (row[1] || '').trim().toLowerCase() === 'pending') {
-        pendingHeaderIdx = i;
-        break;
-      }
-    }
-
-    if (pendingHeaderIdx !== -1) {
-      const pendingSets = { LT2: new Set(), HT2: new Set(), LT1: new Set() };
-      // pendingHeaderIdx + 1 es la fila de encabezados (IGN, Region, Strikes...)
-      for (let i = pendingHeaderIdx + 2; i < rows.length; i++) {
-        const row = rows[i];
-        if (!row) break;
-        let anyData = false;
-        PENDING_TIERS.forEach((tier, idx) => {
-          const base = idx * 6;
-          const ign = (row[base] || '').trim();
-          if (!ign) return;
-          anyData = true;
-          const strikesNum = parseInt((row[base + 2] || '').trim(), 10);
-          if (!isNaN(strikesNum) && strikesNum < 0) {
-            pendingSets[tier].add(ign);
-          }
-        });
-        if (!anyData) break;
-      }
-
-      PENDING_TIERS.forEach(tier => {
-        result[tier].forEach(p => {
-          if (pendingSets[tier].has(p.ign)) p.isPending = true;
-        });
-      });
-    }
     }
     return result;
   }
@@ -428,7 +378,7 @@
             lastRegion = region;
           }
           const row = document.createElement('div');
-          row.className = 'player-row' + (p.isPending ? ' status-pending' : '');
+          row.className = 'player-row';
           row.innerHTML = `
             <img class="player-skin-banner" src="https://vzge.me/bust/400/${encodeURIComponent(p.ign)}" alt="" loading="lazy" onerror="this.remove()">
             <div class="player-main">
