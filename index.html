@@ -18,15 +18,15 @@
     --text-muted: #8492ac;
     --accent: #2dd4bf;
     --accent-dim: #14504a;
-
+ 
     --tier-lt2: #64748b;
     --tier-ht2: #9dbdbd;
     --tier-lt1: #8c7c35;
     --tier-ht1: #eab308;
   }
-
+ 
   * { box-sizing: border-box; }
-
+ 
   body {
     margin: 0;
     background: var(--bg);
@@ -37,12 +37,12 @@
     font-family: 'Inter', system-ui, sans-serif;
     min-height: 100vh;
   }
-
+ 
   header {
     text-align: center;
     padding: 48px 20px 28px;
   }
-
+ 
   .logo {
     font-family: 'Press Start 2P', monospace;
     font-size: clamp(40px, 8vw, 68px);
@@ -52,13 +52,13 @@
   }
   .logo .msm { color: var(--text); }
   .logo .sub { color: var(--accent); text-shadow: 0 4px 0 rgba(0, 0, 0, 0.5), 0 0 24px rgba(45, 212, 191, 0.45), 0 10px 24px rgba(0, 0, 0, 0.55); }
-
+ 
   .tagline {
     color: var(--text-muted);
     font-size: 14px;
     margin-top: 10px;
   }
-
+ 
   nav.mode-tabs {
     display: flex;
     flex-wrap: wrap;
@@ -66,7 +66,7 @@
     gap: 10px;
     padding: 0 16px 8px;
   }
-
+ 
   .mode-tab {
     display: inline-flex;
     align-items: center;
@@ -82,30 +82,30 @@
     cursor: pointer;
     transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
   }
-
+ 
   .mode-icon {
     width: 18px;
     height: 18px;
     object-fit: contain;
   }
-
+ 
   .mode-tab:hover {
     color: var(--text);
     border-color: var(--accent-dim);
   }
-
+ 
   .mode-tab.active {
     color: var(--accent);
     background: rgba(45, 212, 191, 0.16);
     border-color: rgba(45, 212, 191, 0.5);
   }
-
+ 
   main {
     max-width: 1280px;
     margin: 0 auto;
     padding: 32px 20px 80px;
   }
-
+ 
   #status-line {
     text-align: center;
     color: var(--text-muted);
@@ -113,7 +113,7 @@
     margin-bottom: 12px;
     min-height: 16px;
   }
-
+ 
   .status-legend {
     display: flex;
     justify-content: center;
@@ -123,7 +123,7 @@
     overflow: hidden;
     border: 1px solid rgba(157, 189, 208, 0.35);
   }
-
+ 
   .status-legend span {
     flex: 1;
     text-align: center;
@@ -132,28 +132,28 @@
     font-weight: 600;
     white-space: nowrap;
   }
-
+ 
   #tiers-container {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 16px;
     align-items: start;
   }
-
+ 
   @media (max-width: 900px) {
     #tiers-container { grid-template-columns: repeat(2, 1fr); }
   }
   @media (max-width: 560px) {
     #tiers-container { grid-template-columns: 1fr; }
   }
-
+ 
   .tier-column {
     background: var(--bg-elevated);
     border: 1px solid var(--card-border);
     border-radius: 10px;
     overflow: hidden;
   }
-
+ 
   .tier-header {
     font-family: 'Press Start 2P', monospace;
     font-size: 12px;
@@ -161,7 +161,7 @@
     color: #06201c;
     background: var(--tier-color, var(--accent));
   }
-
+ 
   .player-row {
     position: relative;
     min-height: 108px;
@@ -172,7 +172,7 @@
     border-bottom: 1px solid var(--card-border);
     overflow: hidden;
   }
-
+ 
   .player-skin-banner {
     position: absolute;
     top: 0;
@@ -185,16 +185,16 @@
     mask-image: linear-gradient(to left, black 60%, transparent 100%);
     z-index: 0;
   }
-
+ 
   .player-row.status-pending {
     background: rgba(207, 226, 243, 0.07);
   }
-
+ 
   .player-main, .player-meta {
     position: relative;
     z-index: 1;
   }
-
+ 
   .region-divider {
     display: inline-block;
     margin: 12px 16px 8px;
@@ -205,7 +205,7 @@
     letter-spacing: 0.5px;
     text-transform: uppercase;
   }
-
+ 
   .player-main {
     display: flex;
     align-items: center;
@@ -213,7 +213,7 @@
     font-weight: 600;
     font-size: 21px;
   }
-
+ 
   .peak-badge {
     font-size: 10px;
     font-weight: 700;
@@ -222,7 +222,7 @@
     border-radius: 4px;
     padding: 1px 6px;
   }
-
+ 
   .player-meta {
     display: flex;
     gap: 12px;
@@ -230,14 +230,14 @@
     font-size: 12px;
     color: var(--text-muted);
   }
-
+ 
   .empty-row {
     padding: 16px;
     color: var(--text-muted);
     font-size: 13px;
     font-style: italic;
   }
-
+ 
   .loading, .error {
     text-align: center;
     color: var(--text-muted);
@@ -248,12 +248,12 @@
 </style>
 </head>
 <body>
-
+ 
 <header>
   <div class="logo"><span class="msm">MSM</span> <span class="sub">STRIKES</span></div>
   <p class="tagline">Live rankings for Mace Submodes — updated straight from the official spreadsheet</p>
 </header>
-
+ 
 <nav class="mode-tabs" id="mode-tabs">
   <button class="mode-tab active" data-mode="LT"><img class="mode-icon" src="https://cdn.discordapp.com/emojis/1305399436708544512.webp?size=96" alt="">LT Mace</button>
   <button class="mode-tab" data-mode="HT"><img class="mode-icon" src="https://cdn.discordapp.com/emojis/1537148726638936194.webp?size=96" alt="">HT Mace</button>
@@ -262,7 +262,7 @@
   <button class="mode-tab" data-mode="RD"><img class="mode-icon" src="https://cdn.discordapp.com/emojis/1537148680597938278.webp?size=96" alt="">Rod Mace</button>
   <button class="mode-tab" data-mode="SPM"><img class="mode-icon" src="https://cdn.discordapp.com/emojis/1463390685972660288.webp?size=96" alt="">Spear Mace</button>
 </nav>
-
+ 
 <main>
   <p id="status-line"></p>
   <div class="status-legend">
@@ -275,7 +275,7 @@
     <p class="loading">Loading data...</p>
   </div>
 </main>
-
+ 
 <script>
   const SHEETS = {
     LT:  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRbVTBEHcvVLldMXIilLqUS-BURqM7OwFZZopsaHYAesAB_dOWEW85FkJMYmgmKYBLWs8D40m-UeZjl/pub?gid=0&single=true&output=csv",
@@ -285,7 +285,7 @@
     RD:  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRbVTBEHcvVLldMXIilLqUS-BURqM7OwFZZopsaHYAesAB_dOWEW85FkJMYmgmKYBLWs8D40m-UeZjl/pub?gid=1523377691&single=true&output=csv",
     SPM: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRbVTBEHcvVLldMXIilLqUS-BURqM7OwFZZopsaHYAesAB_dOWEW85FkJMYmgmKYBLWs8D40m-UeZjl/pub?gid=1180228026&single=true&output=csv"
   };
-
+ 
   const TIERS = ["LT2", "HT2", "LT1", "HT1"];
   const TIER_COLOR_VARS = {
     LT2: "var(--tier-lt2)",
@@ -302,69 +302,111 @@
     ME: { bg: "#5b5221", text: "#facc15" },
     AU: { bg: "#4a4540", text: "#c6a477" }
   };
-
+ 
   function regionRank(region) {
     const idx = REGION_ORDER.indexOf((region || '').toUpperCase());
     return idx === -1 ? REGION_ORDER.length : idx;
   }
-
+ 
   const container = document.getElementById('tiers-container');
   const statusLine = document.getElementById('status-line');
   let currentMode = 'LT';
-
+ 
   function escapeHtml(str) {
     const div = document.createElement('div');
     div.textContent = str == null ? '' : str;
     return div.innerHTML;
   }
-
+ 
   // Toma el texto CSV crudo de una pestaña y devuelve los jugadores agrupados por tier.
   // Las columnas 0-23 son los 4 bloques (LT2, HT2, LT1, HT1) de 6 columnas cada uno.
   // Se corta al llegar a la fila "Available" (ahí empieza la leyenda/tablas auxiliares).
+  // Más abajo en la hoja hay sub-tablas "LT2 Pending" / "HT2 Pending" / "LT1 Pending"
+  // (HT1 no tiene) que listan a los jugadores marcados como pending, con su cantidad
+  // de strikes en ese momento. Un jugador cuenta como "pending" solo si aparece ahí
+  // Y su valor de strikes en esa sub-tabla es negativo.
   function parseSheet(csvText) {
     const rows = Papa.parse(csvText.trim(), { skipEmptyLines: false }).data;
     const result = { LT2: [], HT2: [], LT1: [], HT1: [] };
-
+    let cutoffIndex = rows.length;
+ 
     for (let i = 2; i < rows.length; i++) {
       const row = rows[i];
       if (!row) continue;
-
+ 
       const firstCell = (row[0] || '').trim().toLowerCase();
-      if (firstCell === 'available') break;
-
+      if (firstCell === 'available') { cutoffIndex = i; break; }
+ 
       TIERS.forEach((tier, idx) => {
         const base = idx * 6;
         const ign = (row[base] || '').trim();
         if (!ign) return;
-        const strikes = (row[base + 2] || '').trim();
-        const strikesNum = parseInt(strikes, 10);
-        const isPending = !isNaN(strikesNum) && strikesNum < 0;
         result[tier].push({
           ign,
           region: (row[base + 1] || '').trim(),
-          strikes,
+          strikes: (row[base + 2] || '').trim(),
           defenses: (row[base + 3] || '').trim(),
           discord: (row[base + 4] || '').trim(),
           peak: (row[base + 5] || '').trim(),
-          isPending
+          isPending: false
         });
       });
     }
+ 
+    // Buscar la fila "LT2 | Pending | ... | HT2 | Pending | ... | LT1 | Pending"
+    const PENDING_TIERS = ['LT2', 'HT2', 'LT1'];
+    let pendingHeaderIdx = -1;
+    for (let i = cutoffIndex; i < rows.length; i++) {
+      const row = rows[i];
+      if (!row) continue;
+      if ((row[0] || '').trim() === 'LT2' && (row[1] || '').trim().toLowerCase() === 'pending') {
+        pendingHeaderIdx = i;
+        break;
+      }
+    }
+ 
+    if (pendingHeaderIdx !== -1) {
+      const pendingSets = { LT2: new Set(), HT2: new Set(), LT1: new Set() };
+      // pendingHeaderIdx + 1 es la fila de encabezados (IGN, Region, Strikes...)
+      for (let i = pendingHeaderIdx + 2; i < rows.length; i++) {
+        const row = rows[i];
+        if (!row) break;
+        let anyData = false;
+        PENDING_TIERS.forEach((tier, idx) => {
+          const base = idx * 6;
+          const ign = (row[base] || '').trim();
+          if (!ign) return;
+          anyData = true;
+          const strikesNum = parseInt((row[base + 2] || '').trim(), 10);
+          if (!isNaN(strikesNum) && strikesNum < 0) {
+            pendingSets[tier].add(ign);
+          }
+        });
+        if (!anyData) break;
+      }
+ 
+      PENDING_TIERS.forEach(tier => {
+        result[tier].forEach(p => {
+          if (pendingSets[tier].has(p.ign)) p.isPending = true;
+        });
+      });
+    }
+    }
     return result;
   }
-
+ 
   function renderTiers(data) {
     container.innerHTML = '';
     TIERS.forEach(tier => {
       const col = document.createElement('div');
       col.className = 'tier-column';
       col.style.setProperty('--tier-color', TIER_COLOR_VARS[tier]);
-
+ 
       const header = document.createElement('div');
       header.className = 'tier-header';
       header.textContent = tier;
       col.appendChild(header);
-
+ 
       const players = data[tier].slice().sort((a, b) => regionRank(a.region) - regionRank(b.region));
       if (players.length === 0) {
         const empty = document.createElement('div');
@@ -401,11 +443,11 @@
           col.appendChild(row);
         });
       }
-
+ 
       container.appendChild(col);
     });
   }
-
+ 
   async function loadMode(modeKey) {
     currentMode = modeKey;
     container.innerHTML = '<p class="loading">Loading data...</p>';
@@ -423,7 +465,7 @@
       console.error(err);
     }
   }
-
+ 
   document.querySelectorAll('.mode-tab').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.mode-tab').forEach(b => b.classList.remove('active'));
@@ -431,12 +473,12 @@
       loadMode(btn.dataset.mode);
     });
   });
-
+ 
   loadMode(currentMode);
-
+ 
   // Refresca los datos solos cada 60 segundos para que se vea "en vivo".
   setInterval(() => loadMode(currentMode), 60000);
 </script>
-
+ 
 </body>
 </html>
