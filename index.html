@@ -517,7 +517,7 @@
     try {
       const data = await fetchModeData(currentMode);
       renderTiers(data);
-      statusLine.textContent = 'Last updated: ' + new Date().toLocaleTimeString('en-US');
+      statusLine.textContent = '' + new Date().toLocaleTimeString('en-US');
     } catch (err) {
       console.error(err);
     }
