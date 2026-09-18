@@ -203,6 +203,10 @@
     background: rgba(244, 204, 204, 0.14);
   }
 
+  .player-row.status-testing {
+    background: rgba(255, 242, 204, 0.14);
+  }
+
   .player-main, .player-meta {
     position: relative;
     z-index: 1;
@@ -272,7 +276,7 @@
 <header>
   <div class="logo-main">Mace Submodes</div>
   <div class="logo-sub">Strikes &amp; Defenses</div>
-  <p class="tagline">Live statistics of High LT2+ players of every gamemode of [1.21+] Mace Submodes Community.</p>
+  <p class="tagline">Live rankings for Mace Submodes — updated straight from the official spreadsheet</p>
 </header>
 
 <nav class="mode-tabs" id="mode-tabs">
@@ -440,6 +444,21 @@
         });
       });
     }
+
+    // Tabla de "Testing" ubicada siempre en A47:E57 (filas 47 a 57, columna A = IGN).
+    const testingSet = new Set();
+    for (let i = 46; i <= 56 && i < rows.length; i++) {
+      const row = rows[i];
+      if (!row) continue;
+      const ign = (row[0] || '').trim();
+      if (ign) testingSet.add(ign.toLowerCase());
+    }
+    TIERS.forEach(tier => {
+      result[tier].forEach(p => {
+        p.isTesting = testingSet.has(p.ign.toLowerCase());
+      });
+    });
+
     return result;
   }
 
@@ -467,7 +486,7 @@
           const regionStyle = REGION_STYLES[region] || { bg: 'var(--card)', text: 'var(--text-muted)' };
           const isLOA = loaSet.has(p.ign.toLowerCase());
           const row = document.createElement('div');
-          row.className = 'player-row' + (p.isPending ? ' status-pending' : '') + (isLOA ? ' status-loa' : '');
+          row.className = 'player-row' + (p.isPending ? ' status-pending' : '') + (isLOA ? ' status-loa' : '') + (p.isTesting ? ' status-testing' : '');
           row.innerHTML = `
             <img class="player-skin-banner" src="https://vzge.me/bust/400/${encodeURIComponent(p.ign)}" alt="" loading="lazy" onerror="this.remove()">
             <div class="player-main">
@@ -503,7 +522,7 @@
     try {
       const data = await fetchModeData(modeKey);
       renderTiers(data);
-      statusLine.textContent = '' + new Date().toLocaleTimeString('en-US');
+      statusLine.textContent = 'Last updated: ' + new Date().toLocaleTimeString('en-US');
     } catch (err) {
       container.innerHTML = '<p class="error">Couldn\'t load the data. Please try again in a moment.</p>';
       statusLine.textContent = '';
@@ -517,7 +536,7 @@
     try {
       const data = await fetchModeData(currentMode);
       renderTiers(data);
-      statusLine.textContent = '' + new Date().toLocaleTimeString('en-US');
+      statusLine.textContent = 'Last updated: ' + new Date().toLocaleTimeString('en-US');
     } catch (err) {
       console.error(err);
     }
