@@ -20,9 +20,9 @@
     --accent-dim: #14504a;
 
     --tier-lt2: #64748b;
-    --tier-ht2: #A3B4C5;
+    --tier-ht2: #97a8be;
     --tier-lt1: #8c7c35;
-    --tier-ht1: #FCC514;
+    --tier-ht1: #fcc514;
   }
 
   * { box-sizing: border-box; }
@@ -446,6 +446,16 @@
     return idx === -1 ? REGION_ORDER.length : idx;
   }
 
+  // Hash simple y estable de un string (no cambia entre refrescos), usado
+  // para dar un orden "al azar" pero consistente a los jugadores sin prioridad.
+  function simpleHash(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = (hash * 31 + str.charCodeAt(i)) >>> 0;
+    }
+    return hash;
+  }
+
   const container = document.getElementById('tiers-container');
   const statusLine = document.getElementById('status-line');
   let currentMode = localStorage.getItem('msm_active_mode') || 'LT';
@@ -531,6 +541,46 @@
       });
     }
 
+    // Buscar la fila "Priority | 1 | DiscordID | 2 | DiscordID" (se repite para LT2, HT2, LT1)
+    const PRIORITY_TIERS = ['LT2', 'HT2', 'LT1'];
+    let priorityHeaderIdx = -1;
+    for (let i = cutoffIndex; i < rows.length; i++) {
+      const row = rows[i];
+      if (!row) continue;
+      if ((row[0] || '').trim() === 'Priority' && (row[1] || '').trim() === '1') {
+        priorityHeaderIdx = i;
+        break;
+      }
+    }
+
+    const priorityRanks = { LT2: new Map(), HT2: new Map(), LT1: new Map() };
+    if (priorityHeaderIdx !== -1) {
+      for (let i = priorityHeaderIdx + 1; i < rows.length; i++) {
+        const row = rows[i];
+        if (!row) break;
+        let anyData = false;
+        PRIORITY_TIERS.forEach((tier, idx) => {
+          const base = idx * 6;
+          const regionCell = (row[base] || '').trim();
+          if (!regionCell) return;
+          anyData = true;
+          const p1 = (row[base + 1] || '').trim();
+          const p2 = (row[base + 3] || '').trim();
+          if (p1 && p1 !== '#N/A') priorityRanks[tier].set(p1.toLowerCase(), 0);
+          if (p2 && p2 !== '#N/A') priorityRanks[tier].set(p2.toLowerCase(), 1);
+        });
+        if (!anyData) break;
+      }
+    }
+
+    TIERS.forEach(tier => {
+      const ranks = priorityRanks[tier];
+      result[tier].forEach(p => {
+        const rank = ranks ? ranks.get(p.ign.toLowerCase()) : undefined;
+        p.priorityRank = rank === undefined ? 2 : rank;
+      });
+    });
+
     // Tabla de "Testing" ubicada siempre en A47:E57 (filas 47 a 57, columna A = IGN).
     const testingSet = new Set();
     for (let i = 46; i <= 56 && i < rows.length; i++) {
@@ -560,7 +610,27 @@
       header.textContent = tier;
       col.appendChild(header);
 
-      const players = data[tier].slice().sort((a, b) => regionRank(a.region) - regionRank(b.region));
+      const players = data[tier].slice();
+      players.forEach(p => { p.isLOA = loaSet.has(p.ign.toLowerCase()); });
+      players.sort((a, b) => {
+        const ra = regionRank(a.region);
+        const rb = regionRank(b.region);
+        if (ra !== rb) return ra - rb;
+
+        const sa = (a.isPending || a.isLOA || a.isTesting) ? 1 : 0;
+        const sb = (b.isPending || b.isLOA || b.isTesting) ? 1 : 0;
+        if (sa !== sb) return sa - sb;
+
+        if (sa === 0) {
+          const pa = a.priorityRank ?? 2;
+          const pb = b.priorityRank ?? 2;
+          if (pa !== pb) return pa - pb;
+        }
+
+        // Para el resto (sin orden particular), un orden estable "al azar"
+        // basado en el nombre, así no se reordena solo con cada refresco.
+        return simpleHash(a.ign) - simpleHash(b.ign);
+      });
       if (players.length === 0) {
         const empty = document.createElement('div');
         empty.className = 'empty-row';
@@ -570,9 +640,8 @@
         players.forEach(p => {
           const region = (p.region || 'Unknown').toUpperCase();
           const regionStyle = REGION_STYLES[region] || { bg: 'var(--card)', text: 'var(--text-muted)' };
-          const isLOA = loaSet.has(p.ign.toLowerCase());
           const row = document.createElement('div');
-          row.className = 'player-row' + (p.isPending ? ' status-pending' : '') + (isLOA ? ' status-loa' : '') + (p.isTesting ? ' status-testing' : '');
+          row.className = 'player-row' + (p.isPending ? ' status-pending' : '') + (p.isLOA ? ' status-loa' : '') + (p.isTesting ? ' status-testing' : '');
           row.innerHTML = `
             <img class="player-skin-banner" src="https://vzge.me/bust/400/${encodeURIComponent(p.ign)}" alt="" loading="lazy" onerror="this.remove()">
             <div class="player-main">
