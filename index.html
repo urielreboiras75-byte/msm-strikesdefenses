@@ -294,8 +294,8 @@
   .peak-badge {
     font-size: 10px;
     font-weight: 700;
-    color: #06201c;
-    background: var(--tier-color, var(--accent));
+    color: #241a03;
+    background: #f5c518;
     border-radius: 4px;
     padding: 1px 6px;
   }
@@ -552,13 +552,12 @@
           const region = (p.region || 'Unknown').toUpperCase();
           const regionStyle = REGION_STYLES[region] || { bg: 'var(--card)', text: 'var(--text-muted)' };
           const isLOA = loaSet.has(p.ign.toLowerCase());
-          const nameColor = isLOA ? 'rgba(242, 168, 168, 0.45)' : (p.isPending ? 'rgba(168, 205, 242, 0.45)' : (p.isTesting ? 'rgba(245, 221, 122, 0.45)' : null));
           const row = document.createElement('div');
           row.className = 'player-row' + (p.isPending ? ' status-pending' : '') + (isLOA ? ' status-loa' : '') + (p.isTesting ? ' status-testing' : '');
           row.innerHTML = `
             <img class="player-skin-banner" src="https://vzge.me/bust/400/${encodeURIComponent(p.ign)}" alt="" loading="lazy" onerror="this.remove()">
             <div class="player-main">
-              <span${nameColor ? ` style="color:${nameColor};"` : ''}>${escapeHtml(p.ign)}</span>
+              <span>${escapeHtml(p.ign)}</span>
               ${p.peak ? '<span class="peak-badge">PEAK</span>' : ''}
             </div>
             <div class="player-meta">
