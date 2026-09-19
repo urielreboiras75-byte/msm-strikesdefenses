@@ -20,9 +20,9 @@
     --accent-dim: #14504a;
 
     --tier-lt2: #64748b;
-    --tier-ht2: #8795B6;
+    --tier-ht2: #97a8be;
     --tier-lt1: #8c7c35;
-    --tier-ht1: #B89621;
+    --tier-ht1: #fcc514;
   }
 
   * { box-sizing: border-box; }
@@ -258,6 +258,7 @@
     flex-direction: column;
     justify-content: flex-start;
     overflow: hidden;
+    border-left: 4px solid transparent;
   }
 
   .player-skin-banner {
@@ -274,15 +275,15 @@
   }
 
   .player-row.status-pending {
-    background: rgba(207, 226, 243, 0.04);
+    border-left-color: rgba(168, 205, 242, 0.3);
   }
 
   .player-row.status-loa {
-    background: rgba(244, 204, 204, 0.04);
+    border-left-color: rgba(242, 168, 168, 0.3);
   }
 
   .player-row.status-testing {
-    background: rgba(255, 242, 204, 0.04);
+    border-left-color: rgba(245, 221, 122, 0.3);
   }
 
   .player-main, .player-meta {
@@ -312,7 +313,7 @@
     font-size: 10px;
     font-weight: 700;
     color: #241a03;
-    background: #B8AB77;
+    background: #f5c518;
     border-radius: 4px;
     padding: 1px 6px;
   }
