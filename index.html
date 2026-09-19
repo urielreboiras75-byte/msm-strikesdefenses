@@ -58,8 +58,10 @@
     letter-spacing: 2px;
     line-height: 1.4;
     margin-top: 10px;
-    color: var(--accent);
-    text-shadow: 0 4px 0 rgba(0, 0, 0, 0.5), 0 0 24px rgba(45, 212, 191, 0.45), 0 10px 24px rgba(0, 0, 0, 0.55);
+    color: transparent;
+    -webkit-text-stroke: 1px var(--accent);
+    text-stroke: 1px var(--accent);
+    text-shadow: 0 0 18px rgba(45, 212, 191, 0.35);
   }
 
   .tagline {
@@ -157,7 +159,6 @@
 
   .tier-column {
     background: var(--bg-elevated);
-    border: 1px solid var(--card-border);
     border-radius: 10px;
     overflow: hidden;
   }
@@ -194,15 +195,15 @@
   }
 
   .player-row.status-pending {
-    background: rgba(207, 226, 243, 0.14);
+    background: rgba(207, 226, 243, 0.04);
   }
 
   .player-row.status-loa {
-    background: rgba(244, 204, 204, 0.14);
+    background: rgba(244, 204, 204, 0.04);
   }
 
   .player-row.status-testing {
-    background: rgba(255, 242, 204, 0.14);
+    background: rgba(255, 242, 204, 0.04);
   }
 
   .player-main, .player-meta {
@@ -249,8 +250,7 @@
     font-size: 10px;
     color: var(--text-muted);
     opacity: 0.75;
-    margin-top: auto;
-    padding-top: 8px;
+    margin-top: 4px;
   }
 
   .empty-row {
@@ -274,7 +274,6 @@
 <header>
   <div class="logo-main">Mace Submodes</div>
   <div class="logo-sub">Strikes &amp; Defenses</div>
-  <p class="tagline">Live rankings for Mace Submodes — updated straight from the official spreadsheet</p>
 </header>
 
 <nav class="mode-tabs" id="mode-tabs">
@@ -290,9 +289,9 @@
   <p id="status-line"></p>
   <div class="status-legend">
     <span style="background:transparent; color:var(--text-muted);">Available</span>
-    <span style="background:rgba(255,242,204,0.24); color:#f5dd7a;">Testing</span>
-    <span style="background:rgba(244,204,204,0.24); color:#f2a8a8;">LOA</span>
-    <span style="background:rgba(207,226,243,0.24); color:#a8cdf2;">Pending</span>
+    <span style="background:rgba(255,242,204,0.08); color:#f5dd7a;">Testing</span>
+    <span style="background:rgba(244,204,204,0.08); color:#f2a8a8;">LOA</span>
+    <span style="background:rgba(207,226,243,0.08); color:#a8cdf2;">Pending</span>
   </div>
   <div id="tiers-container">
     <p class="loading">Loading data...</p>
