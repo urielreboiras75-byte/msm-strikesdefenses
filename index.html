@@ -552,7 +552,7 @@
           const region = (p.region || 'Unknown').toUpperCase();
           const regionStyle = REGION_STYLES[region] || { bg: 'var(--card)', text: 'var(--text-muted)' };
           const isLOA = loaSet.has(p.ign.toLowerCase());
-          const nameColor = isLOA ? '#f2a8a8' : (p.isPending ? '#a8cdf2' : (p.isTesting ? '#f5dd7a' : null));
+          const nameColor = isLOA ? 'rgba(242, 168, 168, 0.45)' : (p.isPending ? 'rgba(168, 205, 242, 0.45)' : (p.isTesting ? 'rgba(245, 221, 122, 0.45)' : null));
           const row = document.createElement('div');
           row.className = 'player-row' + (p.isPending ? ' status-pending' : '') + (isLOA ? ' status-loa' : '') + (p.isTesting ? ' status-testing' : '');
           row.innerHTML = `
