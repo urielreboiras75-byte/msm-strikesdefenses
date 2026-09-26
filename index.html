@@ -274,13 +274,39 @@
     justify-content: space-between;
   }
 
+  .tier-count {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 11px;
+    opacity: 0.7;
+  }
+
+  /* Fila de encabezados de columna: da contexto una sola vez por tier,
+     así cada fila de jugador no necesita repetir "strikes" / "defenses". */
+  .tier-col-head {
+    display: grid;
+    grid-template-columns: 26px 1fr 40px 44px 40px;
+    column-gap: 8px;
+    align-items: center;
+    padding: 8px 16px;
+    font-size: 10.5px;
+    color: var(--text-faint);
+    border-bottom: 1px solid var(--border-soft);
+  }
+
+  .tier-col-head span:nth-child(3),
+  .tier-col-head span:nth-child(4),
+  .tier-col-head span:nth-child(5) {
+    text-align: right;
+  }
+
   .player-row {
     position: relative;
-    padding: 13px 16px;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    overflow: hidden;
+    display: grid;
+    grid-template-columns: 26px 1fr 40px 44px 40px;
+    column-gap: 8px;
+    align-items: center;
+    padding: 9px 16px;
     border-left: 3px solid transparent;
     border-bottom: 1px solid var(--border-soft);
     transition: background 0.12s ease;
@@ -289,87 +315,82 @@
   .tier-column .player-row:last-child { border-bottom: none; }
 
   .player-row:hover {
-    background: rgba(255, 255, 255, 0.02);
+    background: rgba(255, 255, 255, 0.03);
   }
 
-  .player-skin-banner {
-    position: absolute;
-    top: 0;
-    right: -6px;
-    height: 100%;
-    width: auto;
-    opacity: 0.16;
-    pointer-events: none;
-    -webkit-mask-image: linear-gradient(to left, black 55%, transparent 100%);
-    mask-image: linear-gradient(to left, black 55%, transparent 100%);
-    z-index: 0;
-    filter: grayscale(0.2);
+  .player-avatar {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    display: block;
+    background: var(--bg-elevated);
+    object-fit: cover;
+    image-rendering: pixelated;
   }
 
-  .player-row.status-pending {
-    border-left-color: var(--status-pending);
-  }
+  .player-row.status-pending { border-left-color: var(--status-pending); }
+  .player-row.status-loa { border-left-color: var(--status-loa); }
+  .player-row.status-testing { border-left-color: var(--status-testing); }
 
-  .player-row.status-loa {
-    border-left-color: var(--status-loa);
-  }
-
-  .player-row.status-testing {
-    border-left-color: var(--status-testing);
-  }
-
-  .player-main, .player-meta {
-    position: relative;
-    z-index: 1;
-  }
-
-  .region-tag {
-    display: inline-flex;
-    padding: 1px 7px;
-    border-radius: 999px;
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-  }
-
-  .player-main {
+  .player-identity {
     display: flex;
-    align-items: center;
-    gap: 8px;
+    align-items: baseline;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .player-name {
     font-weight: 600;
-    font-size: 19px;
+    font-size: 14.5px;
+    color: var(--text);
     letter-spacing: -0.005em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: default;
   }
 
   .peak-badge {
-    font-size: 10px;
+    flex-shrink: 0;
+    font-size: 9px;
     font-weight: 600;
     color: var(--accent-text);
     background: var(--accent);
     border-radius: 4px;
-    padding: 1px 6px;
+    padding: 1px 5px;
   }
 
-  .player-meta {
-    display: flex;
-    gap: 12px;
-    margin-top: 4px;
-    font-size: 12px;
-    color: var(--text-muted);
-  }
-
-  .player-id {
+  .region-tag {
+    display: inline-flex;
+    justify-self: end;
+    padding: 2px 6px;
+    border-radius: 5px;
     font-size: 10px;
-    color: var(--text-faint);
-    margin-top: 4px;
-    position: relative;
-    z-index: 1;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    cursor: default;
+  }
+
+  .stat-cell {
+    font-variant-numeric: tabular-nums;
+    font-size: 12.5px;
+    color: var(--text-muted);
+    text-align: right;
+    white-space: nowrap;
+    cursor: default;
   }
 
   .empty-row {
     padding: 18px 16px;
     color: var(--text-faint);
     font-size: 13px;
+  }
+
+  @media (max-width: 640px) {
+    .tier-col-head, .player-row {
+      grid-template-columns: 24px 1fr 36px 40px 36px;
+    }
+    .player-name { font-size: 14px; }
   }
 
   .loading, .error {
@@ -642,11 +663,6 @@
       col.className = 'tier-column';
       col.style.setProperty('--tier-color', TIER_COLOR_VARS[tier]);
 
-      const header = document.createElement('div');
-      header.className = 'tier-header';
-      header.textContent = tier;
-      col.appendChild(header);
-
       const players = data[tier].slice();
       players.forEach(p => { p.isLOA = loaSet.has(p.ign.toLowerCase()); });
       players.sort((a, b) => {
@@ -668,29 +684,38 @@
         // basado en el nombre, así no se reordena solo con cada refresco.
         return simpleHash(a.ign) - simpleHash(b.ign);
       });
+
+      const header = document.createElement('div');
+      header.className = 'tier-header';
+      header.innerHTML = `<span>${tier}</span><span class="tier-count">${players.length}</span>`;
+      col.appendChild(header);
+
       if (players.length === 0) {
         const empty = document.createElement('div');
         empty.className = 'empty-row';
         empty.textContent = 'No players';
         col.appendChild(empty);
       } else {
+        const colHead = document.createElement('div');
+        colHead.className = 'tier-col-head';
+        colHead.innerHTML = `<span></span><span>Player</span><span>Reg</span><span>Str</span><span>Def</span>`;
+        col.appendChild(colHead);
+
         players.forEach(p => {
           const region = (p.region || 'Unknown').toUpperCase();
           const regionStyle = REGION_STYLES[region] || { bg: 'var(--card)', text: 'var(--text-muted)' };
           const row = document.createElement('div');
           row.className = 'player-row' + (p.isPending ? ' status-pending' : '') + (p.isLOA ? ' status-loa' : '') + (p.isTesting ? ' status-testing' : '');
+          if (p.discord) row.title = 'Discord: ' + p.discord;
           row.innerHTML = `
-            <img class="player-skin-banner" src="https://vzge.me/bust/400/${encodeURIComponent(p.ign)}" alt="" loading="lazy" onerror="this.remove()">
-            <div class="player-main">
-              <span>${escapeHtml(p.ign)}</span>
+            <img class="player-avatar" src="https://vzge.me/face/64/${encodeURIComponent(p.ign)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
+            <div class="player-identity">
+              <span class="player-name">${escapeHtml(p.ign)}</span>
               ${p.peak ? '<span class="peak-badge">PEAK</span>' : ''}
             </div>
-            <div class="player-meta">
-              <span class="region-tag" style="background:${regionStyle.bg};color:${regionStyle.text};">${escapeHtml(region)}</span>
-              <span>${escapeHtml(p.strikes || '0 / 8')} strikes</span>
-              <span>${escapeHtml(p.defenses || '0')} def</span>
-            </div>
-            ${p.discord ? `<div class="player-id">ID: ${escapeHtml(p.discord)}</div>` : ''}
+            <span class="region-tag" style="background:${regionStyle.bg};color:${regionStyle.text};">${escapeHtml(region)}</span>
+            <span class="stat-cell">${escapeHtml(p.strikes || '0 / 8')}</span>
+            <span class="stat-cell">${escapeHtml(p.defenses || '0')}</span>
           `;
           col.appendChild(row);
         });
