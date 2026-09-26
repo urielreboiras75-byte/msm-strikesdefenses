@@ -763,10 +763,10 @@
               navigator.clipboard.writeText(p.discord).then(() => {
                 if (!hint) return;
                 clearTimeout(row._copyTimeout);
-                hint.textContent = 'Copiado';
+                hint.textContent = 'Copied';
                 hint.classList.add('copied');
                 row._copyTimeout = setTimeout(() => {
-                  hint.textContent = 'Copiar ID';
+                  hint.textContent = 'Copy ID';
                   hint.classList.remove('copied');
                 }, 1200);
               }).catch(() => {});
