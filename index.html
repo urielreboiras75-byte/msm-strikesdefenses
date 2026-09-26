@@ -260,7 +260,11 @@
     background: var(--card);
     border: 1px solid var(--border-soft);
     border-radius: 10px;
-    overflow: hidden;
+  }
+
+  .tier-column > .player-row:last-child,
+  .tier-column > .empty-row:last-child {
+    border-radius: 0 0 9px 9px;
   }
 
   .tier-header {
@@ -269,6 +273,7 @@
     padding: 13px 16px;
     color: var(--accent-text);
     background: var(--tier-color, var(--accent));
+    border-radius: 9px 9px 0 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -294,9 +299,13 @@
     border-bottom: 1px solid var(--border-soft);
   }
 
+  .tier-col-head span:first-child {
+    grid-column: 1 / 3;
+  }
+
+  .tier-col-head span:nth-child(2),
   .tier-col-head span:nth-child(3),
-  .tier-col-head span:nth-child(4),
-  .tier-col-head span:nth-child(5) {
+  .tier-col-head span:nth-child(4) {
     text-align: right;
   }
 
@@ -347,7 +356,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    cursor: default;
   }
 
   .peak-badge {
@@ -368,7 +376,6 @@
     font-size: 10px;
     font-weight: 600;
     letter-spacing: 0.01em;
-    cursor: default;
   }
 
   .stat-cell {
@@ -377,7 +384,40 @@
     color: var(--text-muted);
     text-align: right;
     white-space: nowrap;
-    cursor: default;
+  }
+
+  .player-row.has-discord {
+    cursor: pointer;
+  }
+
+  .copy-hint {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, -100%);
+    margin-top: -4px;
+    background: var(--card-2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 500;
+    padding: 4px 9px;
+    border-radius: 6px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 3;
+    transition: opacity 0.12s ease, transform 0.12s ease;
+  }
+
+  .player-row.has-discord:hover .copy-hint {
+    opacity: 1;
+    transform: translate(-50%, -100%) translateY(-2px);
+  }
+
+  .copy-hint.copied {
+    color: var(--accent);
+    border-color: var(--accent);
   }
 
   .empty-row {
@@ -698,15 +738,14 @@
       } else {
         const colHead = document.createElement('div');
         colHead.className = 'tier-col-head';
-        colHead.innerHTML = `<span></span><span>Player</span><span>Reg</span><span>Str</span><span>Def</span>`;
+        colHead.innerHTML = `<span>Player</span><span>Reg</span><span>Str</span><span>Def</span>`;
         col.appendChild(colHead);
 
         players.forEach(p => {
           const region = (p.region || 'Unknown').toUpperCase();
           const regionStyle = REGION_STYLES[region] || { bg: 'var(--card)', text: 'var(--text-muted)' };
           const row = document.createElement('div');
-          row.className = 'player-row' + (p.isPending ? ' status-pending' : '') + (p.isLOA ? ' status-loa' : '') + (p.isTesting ? ' status-testing' : '');
-          if (p.discord) row.title = 'Discord: ' + p.discord;
+          row.className = 'player-row' + (p.isPending ? ' status-pending' : '') + (p.isLOA ? ' status-loa' : '') + (p.isTesting ? ' status-testing' : '') + (p.discord ? ' has-discord' : '');
           row.innerHTML = `
             <img class="player-avatar" src="https://vzge.me/face/64/${encodeURIComponent(p.ign)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
             <div class="player-identity">
@@ -716,7 +755,23 @@
             <span class="region-tag" style="background:${regionStyle.bg};color:${regionStyle.text};">${escapeHtml(region)}</span>
             <span class="stat-cell">${escapeHtml(p.strikes || '0 / 8')}</span>
             <span class="stat-cell">${escapeHtml(p.defenses || '0')}</span>
+            ${p.discord ? '<span class="copy-hint">Copiar ID</span>' : ''}
           `;
+          if (p.discord) {
+            row.addEventListener('click', () => {
+              const hint = row.querySelector('.copy-hint');
+              navigator.clipboard.writeText(p.discord).then(() => {
+                if (!hint) return;
+                clearTimeout(row._copyTimeout);
+                hint.textContent = 'Copiado';
+                hint.classList.add('copied');
+                row._copyTimeout = setTimeout(() => {
+                  hint.textContent = 'Copiar ID';
+                  hint.classList.remove('copied');
+                }, 1200);
+              }).catch(() => {});
+            });
+          }
           col.appendChild(row);
         });
       }
