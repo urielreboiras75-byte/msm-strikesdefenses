@@ -755,7 +755,7 @@
             <span class="region-tag" style="background:${regionStyle.bg};color:${regionStyle.text};">${escapeHtml(region)}</span>
             <span class="stat-cell">${escapeHtml(p.strikes || '0 / 8')}</span>
             <span class="stat-cell">${escapeHtml(p.defenses || '0')}</span>
-            ${p.discord ? '<span class="copy-hint">Copiar ID</span>' : ''}
+            ${p.discord ? '<span class="copy-hint">Copy ID</span>' : ''}
           `;
           if (p.discord) {
             row.addEventListener('click', () => {
