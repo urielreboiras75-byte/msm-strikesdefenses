@@ -445,6 +445,60 @@
     * { transition: none !important; }
   }
 </style>
+
+<!-- Animación de entrada añadida sin modificar los estilos existentes -->
+<style id="load-animations">
+  @keyframes strikesPageFadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes tierDropDown {
+    0% {
+      opacity: 0;
+      transform: translateY(-18px) scaleY(0.15);
+      transform-origin: top center;
+    }
+    55% {
+      opacity: 1;
+      transform: translateY(2px) scaleY(1.02);
+      transform-origin: top center;
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scaleY(1);
+      transform-origin: top center;
+    }
+  }
+
+  body {
+    animation: strikesPageFadeIn 700ms ease-out both;
+  }
+
+  .tier-column.tier-intro {
+    animation: tierDropDown 650ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .tier-column.tier-intro:nth-child(1) { animation-delay: 120ms; }
+  .tier-column.tier-intro:nth-child(2) { animation-delay: 220ms; }
+  .tier-column.tier-intro:nth-child(3) { animation-delay: 320ms; }
+  .tier-column.tier-intro:nth-child(4) { animation-delay: 420ms; }
+
+  @media (prefers-reduced-motion: reduce) {
+    body {
+      animation: none !important;
+    }
+
+    .tier-column.tier-intro {
+      animation: none !important;
+    }
+  }
+</style>
+
 </head>
 <body>
 
@@ -839,6 +893,26 @@
     refreshLOA();
     refreshCurrentMode();
   }, 60000);
+</script>
+
+
+<script id="load-animation-controller">
+  // Reproduce la animación de despliegue solo en la primera carga.
+  // Después de esa primera renderización, los refrescos siguen siendo silenciosos.
+  (function () {
+    const tiersContainer = document.getElementById('tiers-container');
+    if (!tiersContainer) return;
+
+    const observer = new MutationObserver(() => {
+      const tiers = tiersContainer.querySelectorAll('.tier-column');
+      if (tiers.length === 0) return;
+
+      tiers.forEach(tier => tier.classList.add('tier-intro'));
+      observer.disconnect();
+    });
+
+    observer.observe(tiersContainer, { childList: true });
+  })();
 </script>
 
 </body>
