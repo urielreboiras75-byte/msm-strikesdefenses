@@ -31,6 +31,10 @@
     --status-testing: #dcb75f;
     --status-loa: #d68c88;
     --status-pending: #85aec4;
+
+    /* Curvas de movimiento (más fuertes que las nativas de CSS) */
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   }
 
   * { box-sizing: border-box; }
@@ -93,7 +97,7 @@
     display: inline-block;
     flex-shrink: 0;
     box-shadow: 0 0 0 1px var(--border);
-    transition: box-shadow 0.15s ease, transform 0.15s ease;
+    transition: box-shadow 160ms ease, transform 160ms var(--ease-out);
   }
 
   .site-icon img {
@@ -103,9 +107,19 @@
     object-fit: cover;
   }
 
-  .site-icon:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 0 0 1px var(--accent);
+  @media (hover: hover) and (pointer: fine) {
+    .site-icon:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+  }
+
+  .site-icon:active { transform: scale(0.96); }
+
+  .site-icon:focus-visible,
+  .mode-tab:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
   }
 
   .brand-text { text-align: left; }
@@ -144,6 +158,7 @@
     border-radius: 12px;
     width: fit-content;
     max-width: calc(100% - 32px);
+    position: relative;
   }
 
   .mode-tab {
@@ -159,7 +174,9 @@
     border-radius: 8px;
     padding: 9px 15px;
     cursor: pointer;
-    transition: color 0.15s ease, background 0.15s ease;
+    position: relative;
+    z-index: 1;
+    transition: color 150ms ease, background-color 150ms ease, transform 120ms var(--ease-out);
   }
 
   .mode-icon {
@@ -169,10 +186,14 @@
     opacity: 0.85;
   }
 
-  .mode-tab:hover {
-    color: var(--text);
-    background: rgba(255, 255, 255, 0.03);
+  @media (hover: hover) and (pointer: fine) {
+    .mode-tab:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.03);
+    }
   }
+
+  .mode-tab:active { transform: scale(0.97); }
 
   .mode-tab.active {
     color: var(--text);
@@ -181,6 +202,32 @@
   }
 
   .mode-tab.active .mode-icon { opacity: 1; }
+
+  /* Indicador deslizante: una sola "pastilla" que viaja hasta la pestaña
+     activa (solo transform, sin animar width/height). Sin JS, el estilo
+     .mode-tab.active de arriba sigue funcionando igual. */
+  .tab-indicator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100px;
+    height: 36px;
+    border-radius: 8px;
+    background: var(--card-2);
+    box-shadow: inset 0 0 0 1px var(--border);
+    transform-origin: 0 0;
+    transition: transform 260ms var(--ease-in-out);
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  .mode-tabs.has-indicator .tab-indicator { opacity: 1; }
+  .mode-tabs.no-anim .tab-indicator { transition: none; }
+
+  .mode-tabs.has-indicator .mode-tab.active {
+    background: transparent;
+    border-color: transparent;
+  }
 
   main {
     max-width: 1280px;
@@ -237,6 +284,37 @@
     white-space: nowrap;
     border-radius: 999px;
     border: 1px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  /* El punto repite el color de la barra lateral de cada fila. */
+  .status-legend span::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+  }
+
+  .status-legend span:first-child::before {
+    background: transparent;
+    box-shadow: inset 0 0 0 1px currentColor;
+  }
+
+  #status-line:not(:empty)::before {
+    content: "";
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    margin-right: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0.8;
+    vertical-align: middle;
   }
 
   #tiers-container {
@@ -244,6 +322,7 @@
     grid-template-columns: repeat(4, 1fr);
     gap: 14px;
     align-items: start;
+    min-height: 480px;
   }
 
   @media (max-width: 900px) {
@@ -260,6 +339,7 @@
     background: var(--card);
     border: 1px solid var(--border-soft);
     border-radius: 10px;
+    box-shadow: 0 18px 30px -26px rgba(0, 0, 0, 0.9);
   }
 
   .tier-column > .player-row:last-child,
@@ -273,6 +353,8 @@
     padding: 13px 16px;
     color: var(--accent-text);
     background: var(--tier-color, var(--accent));
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0) 75%);
+    box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.18);
     border-radius: 9px 9px 0 0;
     display: flex;
     align-items: center;
@@ -295,6 +377,8 @@
     align-items: center;
     padding: 8px 16px;
     font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.03em;
     color: var(--text-faint);
     border-bottom: 1px solid var(--border-soft);
   }
@@ -318,13 +402,15 @@
     padding: 9px 16px;
     border-left: 3px solid transparent;
     border-bottom: 1px solid var(--border-soft);
-    transition: background 0.12s ease;
+    transition: background-color 120ms ease;
   }
 
   .tier-column .player-row:last-child { border-bottom: none; }
 
-  .player-row:hover {
-    background: rgba(255, 255, 255, 0.03);
+  @media (hover: hover) and (pointer: fine) {
+    .player-row:hover {
+      background-color: rgba(255, 255, 255, 0.03);
+    }
   }
 
   .player-avatar {
@@ -335,11 +421,23 @@
     background: var(--bg-elevated);
     object-fit: cover;
     image-rendering: pixelated;
+    outline: 1px solid rgba(255, 255, 255, 0.07);
+    outline-offset: -1px;
   }
 
-  .player-row.status-pending { border-left-color: var(--status-pending); }
-  .player-row.status-loa { border-left-color: var(--status-loa); }
-  .player-row.status-testing { border-left-color: var(--status-testing); }
+  /* Barra lateral + un tinte muy suave que se desvanece hacia la derecha. */
+  .player-row.status-pending {
+    border-left-color: var(--status-pending);
+    background-image: linear-gradient(90deg, rgba(133, 174, 196, 0.08), transparent 55%);
+  }
+  .player-row.status-loa {
+    border-left-color: var(--status-loa);
+    background-image: linear-gradient(90deg, rgba(214, 140, 136, 0.08), transparent 55%);
+  }
+  .player-row.status-testing {
+    border-left-color: var(--status-testing);
+    background-image: linear-gradient(90deg, rgba(220, 183, 95, 0.08), transparent 55%);
+  }
 
   .player-identity {
     display: flex;
@@ -394,7 +492,7 @@
     position: absolute;
     top: 0;
     left: 50%;
-    transform: translate(-50%, -100%);
+    transform: translate(-50%, calc(-100% + 4px));
     margin-top: -4px;
     background: var(--card-2);
     border: 1px solid var(--border);
@@ -407,17 +505,34 @@
     opacity: 0;
     pointer-events: none;
     z-index: 3;
-    transition: opacity 0.12s ease, transform 0.12s ease;
+    transition: opacity 120ms ease, transform 160ms var(--ease-out);
   }
 
-  .player-row.has-discord:hover .copy-hint {
+  @media (hover: hover) and (pointer: fine) {
+    .player-row.has-discord:hover .copy-hint {
+      opacity: 1;
+      transform: translate(-50%, -100%);
+    }
+  }
+
+  .player-row.has-discord:active { background-color: rgba(255, 255, 255, 0.05); }
+
+  .player-row.has-discord:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
+
+  .player-row.has-discord:focus-visible .copy-hint {
     opacity: 1;
-    transform: translate(-50%, -100%) translateY(-2px);
+    transform: translate(-50%, -100%);
   }
 
+  /* "Copied" también se ve en pantallas táctiles, donde no hay hover. */
   .copy-hint.copied {
     color: var(--accent);
     border-color: var(--accent);
+    opacity: 1;
+    transform: translate(-50%, -100%);
   }
 
   .empty-row {
@@ -441,61 +556,56 @@
   }
   .error { color: #d68c88; }
 
+  /* Menos movimiento, no cero: se mantienen los cambios de color/opacidad. */
   @media (prefers-reduced-motion: reduce) {
-    * { transition: none !important; }
+    .tab-indicator { transition: none; }
+    .site-icon, .site-icon:hover, .site-icon:active,
+    .mode-tab:active { transform: none; }
+    .copy-hint { transform: translate(-50%, -100%) !important; }
   }
 </style>
 
-<!-- Animación de entrada añadida sin modificar los estilos existentes -->
+<!-- Animaciones: un único momento orquestado al cargar + transiciones que responden a acciones -->
 <style id="load-animations">
-  @keyframes strikesPageFadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
+  /* Entrada de las columnas: solo opacity + translate, ease-out, escalonada. */
+  @keyframes tierEnter {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: none; }
   }
 
-  @keyframes tierDropDown {
-    0% {
-      opacity: 0;
-      transform: translateY(-18px) scaleY(0.15);
-      transform-origin: top center;
-    }
-    55% {
-      opacity: 1;
-      transform: translateY(2px) scaleY(1.02);
-      transform-origin: top center;
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0) scaleY(1);
-      transform-origin: top center;
-    }
+  /* Cambio de modo (LT/HT/...): más corta, sin escalonar. */
+  @keyframes tierSwap {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: none; }
   }
 
-  body {
-    animation: strikesPageFadeIn 700ms ease-out both;
+  @keyframes fadeOnly {
+    from { opacity: 0; }
+    to   { opacity: 1; }
   }
 
-  .tier-column.tier-intro {
-    animation: tierDropDown 650ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  @keyframes softPulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.45; }
   }
 
-  .tier-column.tier-intro:nth-child(1) { animation-delay: 120ms; }
-  .tier-column.tier-intro:nth-child(2) { animation-delay: 220ms; }
-  .tier-column.tier-intro:nth-child(3) { animation-delay: 320ms; }
-  .tier-column.tier-intro:nth-child(4) { animation-delay: 420ms; }
+  .tier-column.tier-intro { animation: tierEnter 420ms var(--ease-out) backwards; }
+  .tier-column.tier-intro:nth-child(1) { animation-delay: 80ms; }
+  .tier-column.tier-intro:nth-child(2) { animation-delay: 140ms; }
+  .tier-column.tier-intro:nth-child(3) { animation-delay: 200ms; }
+  .tier-column.tier-intro:nth-child(4) { animation-delay: 260ms; }
+
+  .tier-column.tier-swap { animation: tierSwap 200ms var(--ease-out) backwards; }
+
+  .loading { animation: softPulse 1.4s ease-in-out infinite; }
 
   @media (prefers-reduced-motion: reduce) {
-    body {
-      animation: none !important;
+    .tier-column.tier-intro,
+    .tier-column.tier-swap {
+      animation: fadeOnly 200ms ease backwards;
+      animation-delay: 0ms !important;
     }
-
-    .tier-column.tier-intro {
-      animation: none !important;
-    }
+    .loading { animation: none; }
   }
 </style>
 
@@ -897,21 +1007,74 @@
 
 
 <script id="load-animation-controller">
-  // Reproduce la animación de despliegue solo en la primera carga.
-  // Después de esa primera renderización, los refrescos siguen siendo silenciosos.
   (function () {
     const tiersContainer = document.getElementById('tiers-container');
+    const nav = document.getElementById('mode-tabs');
     if (!tiersContainer) return;
 
-    const observer = new MutationObserver(() => {
+    // 1) Qué animación toca en el próximo render real de columnas:
+    //    'tier-intro' en la primera carga, 'tier-swap' al cambiar de pestaña.
+    //    Los refrescos silenciosos cada 60 s no animan nada.
+    let pending = 'tier-intro';
+
+    // 2) Filas con Discord ID: accesibles con teclado (Enter / Espacio copian).
+    function enhanceRows() {
+      tiersContainer.querySelectorAll('.player-row.has-discord:not([tabindex])').forEach(row => {
+        row.tabIndex = 0;
+        row.setAttribute('role', 'button');
+        row.addEventListener('keydown', e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            row.click();
+          }
+        });
+      });
+    }
+
+    new MutationObserver(() => {
       const tiers = tiersContainer.querySelectorAll('.tier-column');
       if (tiers.length === 0) return;
+      enhanceRows();
+      if (pending) {
+        tiers.forEach(t => t.classList.add(pending));
+        pending = null;
+      }
+    }).observe(tiersContainer, { childList: true });
 
-      tiers.forEach(tier => tier.classList.add('tier-intro'));
-      observer.disconnect();
+    if (!nav) return;
+
+    nav.addEventListener('click', e => {
+      if (e.target.closest('.mode-tab')) pending = 'tier-swap';
     });
 
-    observer.observe(tiersContainer, { childList: true });
+    // 3) Indicador deslizante de la pestaña activa (transform: translate + scaleX).
+    const indicator = document.createElement('span');
+    indicator.className = 'tab-indicator';
+    indicator.setAttribute('aria-hidden', 'true');
+    nav.prepend(indicator);
+
+    function placeIndicator(instant) {
+      const active = nav.querySelector('.mode-tab.active');
+      if (!active) return;
+      if (instant) nav.classList.add('no-anim');
+      indicator.style.height = active.offsetHeight + 'px';
+      indicator.style.transform =
+        'translate(' + active.offsetLeft + 'px,' + active.offsetTop + 'px) scale(' + (active.offsetWidth / 100) + ',1)';
+      nav.classList.add('has-indicator');
+      if (instant) {
+        void indicator.offsetWidth; // fuerza el reflow antes de reactivar la transición
+        nav.classList.remove('no-anim');
+      }
+    }
+
+    placeIndicator(true);
+    nav.addEventListener('click', e => {
+      if (e.target.closest('.mode-tab')) placeIndicator(false);
+    });
+    window.addEventListener('resize', () => placeIndicator(true));
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => placeIndicator(true));
+    }
   })();
 </script>
 
