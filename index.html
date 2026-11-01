@@ -222,11 +222,6 @@ a.pic:hover img{transform:scale(1.07) rotate(-2deg)}
 }
 @media (max-width:520px){#total{display:none}.brand small{letter-spacing:.08em}}
 @media (max-width:380px){.burger{margin-left:-150px}.price{font-size:28px}}
-@media (prefers-reduced-motion:reduce){
-  html{scroll-behavior:auto}
-  .spin{animation:none}
-  *{transition-duration:.01ms!important}
-}
 </style>
 </head>
 <body>
@@ -381,7 +376,7 @@ var SECTIONS=[
 var cart={}, geo="", $=function(i){return document.getElementById(i)};
 var all=[]; SECTIONS.forEach(function(s){(s.items||[]).forEach(function(i){all.push(i)});(s.groups||[]).forEach(function(g){g.items.forEach(function(i){all.push(i)})})});
 var byId={}; all.forEach(function(i){byId[i.id]=i});
-var RM=window.matchMedia("(prefers-reduced-motion: reduce)");
+var RM={matches:false}; // la página anima siempre, aunque el equipo tenga las animaciones reducidas
 function money(n){return "$"+n.toLocaleString("es-AR")}
 function store(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
 function poster(id){return ASSETS+"burgers/"+id+"-0.webp"}
