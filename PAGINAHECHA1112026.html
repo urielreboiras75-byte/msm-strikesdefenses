@@ -3,32 +3,32 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#0c0d0f">
+<meta name="theme-color" content="#17181d">
 <title>MSM Strikes & Defenses</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Jersey+25&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <style>
   :root {
     color-scheme: dark;
 
-    /* Superficies: grafito neutro. Los colores de tiers, estados y regiones NO cambiaron. */
-    --bg: #0c0d0f;
-    --surface: #131417;
-    --surface-2: #1a1b1f;
-    --card: #131417;
-    --shell: rgba(255, 255, 255, 0.025);
-    --border: rgba(255, 255, 255, 0.09);
-    --border-soft: rgba(255, 255, 255, 0.055);
-    --hover: rgba(255, 255, 255, 0.045);
-    --text: #eceef0;
-    --text-muted: #a3a6ad;
-    --text-faint: #7d8089;
+    /* Superficies: pizarra (deepslate). Los colores de tiers, estados y regiones NO cambiaron. */
+    --bg: #17181d;
+    --surface: #202228;
+    --surface-2: #2b2e36;
+    --well: #121317;
+    --card: #202228;
+    --border: rgba(255, 255, 255, 0.1);
+    --border-soft: rgba(255, 255, 255, 0.06);
+    --hover: rgba(255, 255, 255, 0.05);
+    --text: #f0f1f3;
+    --text-muted: #b4b8c1;
+    --text-faint: #8f939e;
 
-    --accent: #cf9a4c;
-    --accent-soft: rgba(207, 154, 76, 0.14);
-    --accent-text: #2a1c0c;
+    --accent: #ecc95a;
+    --accent-soft: rgba(236, 201, 90, 0.2);
+    --accent-text: #1c1408;
 
     --tier-lt2: #7e786d;
     --tier-ht2: #8b96a0;
@@ -39,13 +39,12 @@
     --status-loa: #d68c88;
     --status-pending: #85aec4;
 
-    /* Escala de radios (concéntrica): carcasa 20 > núcleo 14 (20 - 6 de padding) > controles 10 > chips 6 */
-    --r-shell: 20px;
-    --r-core: 14px;
-    --r-ctl: 10px;
-    --r-chip: 6px;
+    /* Relieve de interfaz de Minecraft: luz arriba a la izquierda, sombra abajo a la derecha. */
+    --raised: inset 2px 2px 0 rgba(255, 255, 255, 0.07), inset -2px -2px 0 rgba(0, 0, 0, 0.28);
+    --sunken: inset 2px 2px 0 rgba(0, 0, 0, 0.45), inset -2px -2px 0 rgba(255, 255, 255, 0.06);
 
-    --font: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font: 'Instrument Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-pixel: 'Jersey 25', system-ui, sans-serif;
 
     --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
     --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
@@ -53,7 +52,7 @@
 
   * { box-sizing: border-box; }
 
-  html { background: var(--bg); scrollbar-color: #2b2d33 transparent; }
+  html { background: var(--bg); scrollbar-color: #3a3d46 transparent; }
 
   ::selection { background: var(--accent-soft); color: var(--text); }
 
@@ -69,26 +68,16 @@
     text-rendering: optimizeLegibility;
   }
 
-  /* Un único foco de luz fijo y neutro detrás del encabezado (sin grano ni degradés de color). */
-  body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    background: radial-gradient(ellipse 900px 420px at 18% -8%, rgba(255, 255, 255, 0.05), transparent 70%);
-  }
-
   a { color: inherit; }
   button { font-family: inherit; -webkit-tap-highlight-color: transparent; }
 
   /* ---------- Encabezado ---------- */
   header {
-    max-width: 1360px;
+    max-width: 1520px;
     margin: 0 auto;
-    padding: 40px 20px 24px;
+    padding: 36px 24px 22px;
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: space-between;
     gap: 12px 24px;
     flex-wrap: wrap;
@@ -97,18 +86,19 @@
   .brand {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 18px;
+    min-width: 0;
   }
 
   .site-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: var(--r-ctl);
-    overflow: hidden;
+    width: 76px;
+    height: 76px;
+    padding: 4px;
     display: inline-block;
     flex-shrink: 0;
-    box-shadow: 0 0 0 1px var(--border);
-    transition: box-shadow 160ms ease, transform 160ms var(--ease-out);
+    background: var(--well);
+    box-shadow: var(--sunken);
+    transition: transform 160ms var(--ease-out);
   }
 
   .site-icon img {
@@ -119,135 +109,159 @@
   }
 
   @media (hover: hover) and (pointer: fine) {
-    .site-icon:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 0 0 1px var(--accent);
-    }
+    .site-icon:hover { transform: translateY(-2px); }
   }
 
   .site-icon:active { transform: scale(0.96); }
 
-  .brand-text { text-align: left; }
+  .brand-text { text-align: left; min-width: 0; }
 
+  /* La sombra dura sin desenfoque es la misma que usa el texto dentro del juego. */
   .wordmark {
     margin: 0;
-    font-weight: 600;
-    font-size: clamp(24px, 3.4vw, 32px);
-    line-height: 1.1;
-    letter-spacing: -0.035em;
+    font-family: var(--font-pixel);
+    font-weight: 400;
+    font-size: clamp(42px, 6vw, 68px);
+    line-height: 0.95;
+    letter-spacing: 0.01em;
     color: var(--text);
+    text-shadow: 3px 3px 0 #3c3f49;
   }
 
   .subtitle {
-    margin: 4px 0 0;
-    font-size: 13.5px;
+    margin: 6px 0 0;
+    font-size: 15px;
     color: var(--text-muted);
   }
 
   #status-line {
-    margin: 0;
-    min-height: 18px;
-    font-size: 12.5px;
-    color: var(--text-faint);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 4px;
+    min-height: 20px;
+    font-size: 13px;
+    color: var(--text-muted);
     font-variant-numeric: tabular-nums;
   }
 
-  /* ---------- Barra de modos (vidrio, fija al hacer scroll) ---------- */
+  /* Solo aparece cuando ya hay datos cargados. */
+  #status-line:not(:empty)::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    background: #7fd08a;
+    box-shadow: 0 0 0 2px rgba(127, 208, 138, 0.22);
+  }
+
+  /* ---------- Barra de objetos: los modos de juego, abajo y centrados como en el juego ---------- */
   .toolbar {
-    position: sticky;
-    top: 12px;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: max(14px, env(safe-area-inset-bottom));
     z-index: 20;
-    max-width: 1360px;
-    margin: 0 auto;
-    padding: 0 20px;
+    display: flex;
+    justify-content: center;
+    padding: 0 12px;
     pointer-events: none;
+  }
+
+  /* Los jugadores se funden detrás de la barra en lugar de cortarse de golpe. */
+  .toolbar::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: calc(-1 * max(14px, env(safe-area-inset-bottom)));
+    height: 112px;
+    z-index: -1;
+    background: linear-gradient(to top, var(--bg) 36%, rgba(23, 24, 29, 0));
   }
 
   nav.mode-tabs {
     position: relative;
     display: flex;
     flex-wrap: nowrap;
-    gap: 2px;
+    gap: 0;
     width: fit-content;
     max-width: 100%;
+    min-width: 0;
     padding: 4px;
     overflow-x: auto;
     scrollbar-width: none;
     pointer-events: auto;
-    background: rgba(19, 20, 23, 0.72);
-    -webkit-backdrop-filter: blur(18px) saturate(160%);
-    backdrop-filter: blur(18px) saturate(160%);
-    border: 1px solid var(--border);
-    border-radius: var(--r-core);
-    box-shadow: 0 12px 32px -14px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    background: #34373f;
+    box-shadow: var(--raised), 0 14px 30px -12px rgba(0, 0, 0, 0.75);
   }
 
   nav.mode-tabs::-webkit-scrollbar { display: none; }
 
+  /* 100px exactos: el marco de selección mide eso y así sus bordes no se deforman. */
   .mode-tab {
     position: relative;
     z-index: 1;
-    flex-shrink: 0;
+    flex: 0 0 100px;
+    width: 100px;
+    height: 66px;
     display: inline-flex;
+    flex-direction: column;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
+    gap: 3px;
     white-space: nowrap;
     font-weight: 500;
-    font-size: 13px;
+    font-size: 12.5px;
+    line-height: 1.2;
     color: var(--text-muted);
-    background: transparent;
-    border: 1px solid transparent;
-    border-radius: var(--r-ctl);
-    padding: 8px 14px;
+    background: var(--well);
+    border: 0;
+    border-radius: 0;
+    box-shadow: var(--sunken);
+    padding: 0 4px;
     cursor: pointer;
-    transition: color 150ms ease, background-color 150ms ease, transform 120ms var(--ease-out);
+    transition: color 150ms ease, background-color 150ms ease;
   }
 
   .mode-icon {
-    width: 16px;
-    height: 16px;
+    width: 28px;
+    height: 28px;
     object-fit: contain;
-    opacity: 0.8;
-    transition: opacity 150ms ease;
+    image-rendering: pixelated;
+    transition: transform 160ms var(--ease-out);
   }
 
   @media (hover: hover) and (pointer: fine) {
-    .mode-tab:hover {
-      color: var(--text);
-      background: rgba(255, 255, 255, 0.04);
-    }
+    .mode-tab:hover { color: var(--text); background: #1b1c22; }
+    .mode-tab:hover .mode-icon { transform: translateY(-1px); }
   }
 
-  .mode-tab:active { transform: scale(0.97); }
+  .mode-tab:active .mode-icon { transform: scale(0.9); }
 
   .mode-tab.active {
     color: var(--text);
-    background: rgba(255, 255, 255, 0.08);
+    font-weight: 600;
+    background: #23252c;
   }
 
-  .mode-tab.active .mode-icon { opacity: 1; }
-
-  /* Indicador deslizante: una sola pieza que viaja hasta la pestaña activa
-     (solo transform). Sin JS, el estilo .mode-tab.active sigue funcionando. */
+  /* Marco de selección: una sola pieza que viaja hasta la pestaña activa.
+     Sin JS, el estilo .mode-tab.active sigue funcionando. */
   .tab-indicator {
     position: absolute;
     top: 0;
     left: 0;
+    z-index: 2;
     width: 100px;
-    height: 36px;
-    border-radius: var(--r-ctl);
-    background: rgba(255, 255, 255, 0.085);
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    height: 66px;
+    box-shadow: inset 0 0 0 3px var(--accent), inset 0 0 0 4px rgba(0, 0, 0, 0.5);
     transform-origin: 0 0;
-    transition: transform 260ms var(--ease-in-out);
+    transition: transform 240ms var(--ease-in-out);
     pointer-events: none;
     opacity: 0;
   }
 
   .mode-tabs.has-indicator .tab-indicator { opacity: 1; }
   .mode-tabs.no-anim .tab-indicator { transition: none; }
-
-  .mode-tabs.has-indicator .mode-tab.active { background: transparent; }
 
   .site-icon:focus-visible,
   .mode-tab:focus-visible,
@@ -256,11 +270,13 @@
     outline-offset: 2px;
   }
 
+  .mode-tab:focus-visible { outline-offset: -6px; }
+
   /* ---------- Contenido ---------- */
   main {
-    max-width: 1360px;
+    max-width: 1520px;
     margin: 0 auto;
-    padding: 24px 20px 72px;
+    padding: 4px 24px 132px;
   }
 
   .legend-bar {
@@ -269,7 +285,7 @@
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 10px 24px;
-    margin-bottom: 18px;
+    margin-bottom: 16px;
   }
 
   /* Los colores de cada referencia viven en el HTML (inline) y no se tocaron. */
@@ -280,24 +296,34 @@
   }
 
   .status-legend span {
-    padding: 6px 12px;
-    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 11px 5px 9px;
+    font-size: 13px;
     font-weight: 500;
     white-space: nowrap;
-    border-radius: var(--r-chip);
+    border-radius: 0;
     border: 1px solid transparent;
+  }
+
+  .status-legend span::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    background: currentColor;
   }
 
   .legend-hint {
     margin: 0;
-    font-size: 12.5px;
-    color: var(--text-faint);
+    font-size: 13px;
+    color: var(--text-muted);
   }
 
   #tiers-container {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 16px;
+    gap: 14px;
     align-items: start;
     min-height: 520px;
   }
@@ -308,61 +334,72 @@
 
   @media (max-width: 639px) {
     #tiers-container { grid-template-columns: minmax(0, 1fr); }
-    header { padding-top: 28px; }
+    header { padding: 24px 16px 18px; }
+    main { padding-left: 16px; padding-right: 16px; }
     .brand { gap: 12px; }
+    .site-icon { width: 60px; height: 60px; padding: 3px; }
+    .wordmark { font-size: 38px; text-shadow: 2px 2px 0 #3c3f49; }
+    .subtitle { font-size: 14px; margin-top: 4px; }
+    .toolbar { padding: 0 8px; }
+    .mode-tab { height: 60px; font-size: 12px; }
+    .mode-icon { width: 24px; height: 24px; }
   }
 
-  /* ---------- Tabla por tier: doble marco (carcasa + núcleo) ---------- */
-  .tier-column,
-  .sk-col {
-    padding: 6px;
-    background: var(--shell);
-    border: 1px solid var(--border-soft);
-    border-radius: var(--r-shell);
-  }
-
+  /* ---------- Tabla por tier ---------- */
   .tier-core {
     background: var(--surface);
-    border-radius: var(--r-core);
     overflow: hidden;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 0 0 1px var(--border-soft);
+    box-shadow: 0 0 0 1px var(--border-soft);
   }
 
   .tier-header {
-    height: 46px;
-    padding: 0 16px;
+    position: relative;
+    height: 60px;
+    padding: 0 14px 0 16px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-family: 'Press Start 2P', monospace;
-    font-size: 11px;
+    font-family: var(--font-pixel);
+    font-size: 40px;
+    line-height: 1;
     letter-spacing: 0.02em;
     color: var(--accent-text);
     background: var(--tier-color, var(--accent));
-    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0) 80%);
+    box-shadow: inset 2px 2px 0 rgba(255, 255, 255, 0.2);
+  }
+
+  /* Borde escalonado en píxeles, como el pasto que cae sobre un bloque de tierra. */
+  .tier-header::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    height: 6px;
+    background:
+      conic-gradient(var(--tier-color, var(--accent)) 25%, transparent 0 50%, var(--tier-color, var(--accent)) 0 75%, transparent 0)
+      0 0 / 12px 12px;
   }
 
   .tier-count {
-    min-width: 24px;
-    padding: 3px 7px;
+    min-width: 34px;
+    padding: 4px 8px 3px;
     text-align: center;
-    font-family: var(--font);
-    font-weight: 600;
-    font-size: 11.5px;
-    font-variant-numeric: tabular-nums;
-    border-radius: var(--r-chip);
-    background: rgba(42, 28, 12, 0.14);
+    font-size: 22px;
+    line-height: 1;
+    letter-spacing: 0;
+    background: rgba(0, 0, 0, 0.16);
+    box-shadow: inset 2px 2px 0 rgba(0, 0, 0, 0.16);
   }
 
   .tier-col-head {
     display: grid;
-    grid-template-columns: 28px minmax(0, 1fr) 34px 44px 30px;
+    grid-template-columns: 38px minmax(0, 1fr) 34px 44px 28px;
     column-gap: 8px;
     align-items: center;
-    padding: 12px 14px 6px;
-    font-size: 11px;
+    padding: 18px 12px 6px;
+    font-size: 12px;
     font-weight: 500;
-    letter-spacing: 0.01em;
     color: var(--text-faint);
   }
 
@@ -375,32 +412,30 @@
   .player-row {
     position: relative;
     display: grid;
-    grid-template-columns: 28px minmax(0, 1fr) 34px 44px 30px;
+    grid-template-columns: 38px minmax(0, 1fr) 34px 44px 28px;
     column-gap: 8px;
     align-items: center;
-    margin: 0 6px;
-    padding: 7px 8px;
-    border-radius: var(--r-ctl);
+    padding: 6px 12px;
+    border-top: 1px solid var(--border-soft);
     transition: background-color 120ms ease;
   }
 
-  .player-row + .player-row { margin-top: 2px; }
-  .player-row:last-child { margin-bottom: 6px; }
+  .player-row:last-child { margin-bottom: 4px; }
 
   @media (hover: hover) and (pointer: fine) {
     .player-row:hover { background-color: var(--hover); }
   }
 
+  /* La cara del jugador va dentro de una casilla de inventario. */
   .player-avatar {
-    width: 28px;
-    height: 28px;
-    border-radius: var(--r-chip);
+    width: 38px;
+    height: 38px;
+    padding: 3px;
     display: block;
-    background: var(--surface-2);
+    background: var(--well);
+    box-shadow: var(--sunken);
     object-fit: cover;
     image-rendering: pixelated;
-    outline: 1px solid rgba(255, 255, 255, 0.07);
-    outline-offset: -1px;
   }
 
   /* Estados: barra lateral + tinte suave que se desvanece. Mismos colores de siempre. */
@@ -408,30 +443,25 @@
     content: "";
     position: absolute;
     left: 0;
-    top: 9px;
-    bottom: 9px;
-    width: 3px;
-    border-radius: 2px;
+    top: 0;
+    bottom: 0;
+    width: 4px;
     background: var(--status-color, transparent);
     opacity: 0;
     transition: opacity 150ms ease;
   }
 
-  .player-row.status-pending,
-  .player-row.status-loa,
-  .player-row.status-testing { }
-
   .player-row.status-pending {
     --status-color: var(--status-pending);
-    background-image: linear-gradient(90deg, rgba(133, 174, 196, 0.09), transparent 55%);
+    background-image: linear-gradient(90deg, rgba(133, 174, 196, 0.13), transparent 62%);
   }
   .player-row.status-loa {
     --status-color: var(--status-loa);
-    background-image: linear-gradient(90deg, rgba(214, 140, 136, 0.09), transparent 55%);
+    background-image: linear-gradient(90deg, rgba(214, 140, 136, 0.13), transparent 62%);
   }
   .player-row.status-testing {
     --status-color: var(--status-testing);
-    background-image: linear-gradient(90deg, rgba(220, 183, 95, 0.09), transparent 55%);
+    background-image: linear-gradient(90deg, rgba(220, 183, 95, 0.13), transparent 62%);
   }
 
   .player-row.status-pending::before,
@@ -447,9 +477,8 @@
 
   .player-name {
     font-weight: 600;
-    font-size: 14px;
+    font-size: 15px;
     color: var(--text);
-    letter-spacing: -0.01em;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -457,57 +486,56 @@
 
   .peak-badge {
     flex-shrink: 0;
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
+    font-family: var(--font-pixel);
+    font-size: 14px;
+    line-height: 1;
+    letter-spacing: 0.05em;
     color: var(--accent-text);
     background: var(--accent);
-    border-radius: var(--r-chip);
-    padding: 2px 5px;
+    padding: 2px 4px 1px;
   }
 
   .region-tag {
     display: inline-flex;
     justify-self: end;
-    padding: 2px 6px;
-    border-radius: var(--r-chip);
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.01em;
+    padding: 3px 5px 2px;
+    font-family: var(--font-pixel);
+    font-size: 15px;
+    line-height: 1;
+    letter-spacing: 0.03em;
   }
 
   .stat-cell {
-    font-variant-numeric: tabular-nums;
-    font-size: 12.5px;
-    font-weight: 500;
-    color: var(--text-muted);
+    font-family: var(--font-pixel);
+    font-size: 21px;
+    line-height: 1;
+    color: var(--text);
     text-align: right;
     white-space: nowrap;
   }
 
   .player-row.has-discord { cursor: pointer; }
-  .player-row.has-discord:active { background-color: rgba(255, 255, 255, 0.07); }
+  .player-row.has-discord:active { background-color: rgba(255, 255, 255, 0.08); }
 
   .player-row.has-discord:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: -2px;
   }
 
+  /* Mismo aspecto que la ficha de un objeto dentro del juego. */
   .copy-hint {
     position: absolute;
     top: 0;
     left: 50%;
     transform: translate(-50%, calc(-100% + 4px));
-    margin-top: -4px;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    color: var(--text-muted);
-    font-size: 11px;
+    margin-top: -2px;
+    background: #15091c;
+    box-shadow: inset 0 0 0 2px #38206a;
+    color: var(--text);
+    font-size: 12px;
     font-weight: 500;
-    padding: 4px 9px;
-    border-radius: var(--r-chip);
+    padding: 5px 10px;
     white-space: nowrap;
-    box-shadow: 0 8px 18px -8px rgba(0, 0, 0, 0.7);
     opacity: 0;
     pointer-events: none;
     z-index: 3;
@@ -529,29 +557,21 @@
   /* "Copied" también se ve en pantallas táctiles, donde no hay hover. */
   .copy-hint.copied {
     color: var(--accent);
-    border-color: var(--accent);
     opacity: 1;
     transform: translate(-50%, -100%);
   }
 
   .empty-row {
-    padding: 22px 16px 24px;
-    color: var(--text-faint);
-    font-size: 13px;
-  }
-
-  @media (max-width: 640px) {
-    .tier-col-head, .player-row {
-      grid-template-columns: 26px minmax(0, 1fr) 34px 42px 28px;
-    }
+    padding: 24px 16px 26px;
+    color: var(--text-muted);
+    font-size: 14px;
   }
 
   /* ---------- Carga (esqueleto con la forma final) y error ---------- */
   .sk {
     position: relative;
     overflow: hidden;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: var(--r-chip);
+    background: rgba(255, 255, 255, 0.06);
   }
 
   .sk::after {
@@ -563,17 +583,17 @@
     animation: shimmer 1.5s ease-in-out infinite;
   }
 
-  .sk-head { height: 46px; border-radius: 0; background: rgba(255, 255, 255, 0.07); }
+  .sk-head { height: 60px; margin-bottom: 12px; background: rgba(255, 255, 255, 0.08); }
 
   .sk-row {
     display: grid;
-    grid-template-columns: 28px minmax(0, 1fr) 34px;
+    grid-template-columns: 38px minmax(0, 1fr) 34px;
     column-gap: 10px;
     align-items: center;
-    padding: 9px 14px;
+    padding: 6px 12px;
   }
 
-  .sk-avatar { width: 28px; height: 28px; }
+  .sk-avatar { width: 38px; height: 38px; }
   .sk-line { height: 10px; }
   .sk-short { width: 26px; justify-self: end; }
 
@@ -586,42 +606,34 @@
     padding: 72px 20px;
     text-align: center;
     color: var(--text-muted);
-    font-size: 14px;
+    font-size: 15px;
   }
 
   .error p { margin: 0; }
 
   .retry-btn {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
-    color: #0c0d0f;
-    background: var(--text);
+    color: var(--accent-text);
+    background: var(--accent);
     border: 0;
-    border-radius: var(--r-ctl);
-    padding: 9px 16px;
+    box-shadow: inset 2px 2px 0 rgba(255, 255, 255, 0.35), inset -2px -2px 0 rgba(0, 0, 0, 0.2);
+    padding: 10px 18px;
     cursor: pointer;
     transition: background-color 150ms ease, transform 120ms var(--ease-out);
   }
 
   @media (hover: hover) and (pointer: fine) {
-    .retry-btn:hover { background: #ffffff; }
+    .retry-btn:hover { background: #f4d873; }
   }
 
   .retry-btn:active { transform: scale(0.97); }
-
-  @media (prefers-reduced-transparency: reduce) {
-    nav.mode-tabs {
-      background: var(--surface-2);
-      -webkit-backdrop-filter: none;
-      backdrop-filter: none;
-    }
-  }
 
   /* Menos movimiento, no cero: se mantienen los cambios de color y opacidad. */
   @media (prefers-reduced-motion: reduce) {
     .tab-indicator { transition: none; }
     .site-icon, .site-icon:hover, .site-icon:active,
-    .mode-tab:active, .retry-btn:active { transform: none; }
+    .mode-tab:hover .mode-icon, .mode-tab:active .mode-icon, .retry-btn:active { transform: none; }
     .copy-hint { transform: translate(-50%, -100%) !important; }
     .sk::after { animation: none; }
   }
