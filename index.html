@@ -48,6 +48,7 @@
 
     --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
     --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+    --ease-open: cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   * { box-sizing: border-box; }
@@ -583,19 +584,10 @@
     animation: shimmer 1.5s ease-in-out infinite;
   }
 
-  .sk-head { height: 60px; margin-bottom: 12px; background: rgba(255, 255, 255, 0.08); }
+  .sk-head { height: 60px; background: rgba(255, 255, 255, 0.08); }
 
-  .sk-row {
-    display: grid;
-    grid-template-columns: 38px minmax(0, 1fr) 34px;
-    column-gap: 10px;
-    align-items: center;
-    padding: 6px 12px;
-  }
-
-  .sk-avatar { width: 38px; height: 38px; }
-  .sk-line { height: 10px; }
-  .sk-short { width: 26px; justify-self: end; }
+  /* Mientras carga solo se ven los encabezados: la tabla se abre recién cuando hay datos. */
+  .sk-row { display: none; }
 
   .error {
     grid-column: 1 / -1;
@@ -641,31 +633,21 @@
 
 <!-- Animaciones: un único momento orquestado al cargar + transiciones que responden a acciones -->
 <style id="load-animations">
-  /* Dos momentos: la entrada al cargar (tier-intro) y el cambio de modo (tier-swap).
+  /* Dos momentos: la entrada al cargar (tier-intro) y el cambio de modo (tier-closing y tier-swap).
      Los refrescos silenciosos de cada minuto no llevan ninguna de las dos clases, así que no animan. */
-  @keyframes tierEnter {
-    from { opacity: 0; transform: translateY(14px); }
-    to   { opacity: 1; transform: none; }
+  /* 66px = alto del encabezado + su borde escalonado: lo que queda visible con la tabla cerrada. */
+  @keyframes tableOpen {
+    from { clip-path: inset(0 0 calc(100% - 66px) 0); }
+    to   { clip-path: inset(0 0 0 0); }
   }
 
-  @keyframes tierSwap {
-    from { opacity: 0; }
-    to   { opacity: 1; }
+  @keyframes tableClose {
+    from { clip-path: inset(0 0 0 0); }
+    to   { clip-path: inset(0 0 calc(100% - 66px) 0); }
   }
 
-  @keyframes headerDrop {
-    from { transform: translateY(-100%); }
-    to   { transform: none; }
-  }
-
-  @keyframes countPop {
-    0%   { opacity: 0; transform: scale(0.6); }
-    65%  { opacity: 1; transform: scale(1.12); }
-    100% { opacity: 1; transform: none; }
-  }
-
-  @keyframes rowEnter {
-    from { opacity: 0; transform: translateX(-10px); }
+  @keyframes rowSettle {
+    from { opacity: 0; transform: translateY(-10px); }
     to   { opacity: 1; transform: none; }
   }
 
@@ -715,60 +697,34 @@
 
   .mode-tab.active .mode-icon { animation: itemPick 320ms var(--ease-out); }
 
-  /* ---------- Tablas: cada columna y fila sabe su lugar, y de ahí sale su demora ---------- */
+  /* ---------- Tablas: se abren hacia abajo desde el borde del encabezado de color ---------- */
   .tier-column:nth-child(1) { --c: 0; }
   .tier-column:nth-child(2) { --c: 1; }
   .tier-column:nth-child(3) { --c: 2; }
   .tier-column:nth-child(4) { --c: 3; }
 
-  .player-row { --r: 12; }
-  .player-row:nth-child(3)  { --r: 0; }
-  .player-row:nth-child(4)  { --r: 1; }
-  .player-row:nth-child(5)  { --r: 2; }
-  .player-row:nth-child(6)  { --r: 3; }
-  .player-row:nth-child(7)  { --r: 4; }
-  .player-row:nth-child(8)  { --r: 5; }
-  .player-row:nth-child(9)  { --r: 6; }
-  .player-row:nth-child(10) { --r: 7; }
-  .player-row:nth-child(11) { --r: 8; }
-  .player-row:nth-child(12) { --r: 9; }
-  .player-row:nth-child(13) { --r: 10; }
-  .player-row:nth-child(14) { --r: 11; }
-
-  /* Al cargar: entrada completa, columna por columna. */
-  .tier-column.tier-intro {
-    animation: tierEnter 440ms var(--ease-out) backwards;
-    animation-delay: calc(var(--c) * 80ms);
+  /* Al cargar: el encabezado toma su color y la tabla se despliega, columna por columna. */
+  .tier-intro .tier-header { animation: frameIn 280ms ease backwards; }
+  .tier-intro .tier-core {
+    animation: tableOpen 760ms var(--ease-open) backwards;
+    animation-delay: calc(var(--c) * 70ms + 160ms);
   }
-  .tier-intro .tier-header {
-    animation: headerDrop 380ms var(--ease-out) backwards;
-    animation-delay: calc(var(--c) * 80ms + 90ms);
-  }
-  .tier-intro .tier-count {
-    animation: countPop 300ms var(--ease-out) backwards;
-    animation-delay: calc(var(--c) * 80ms + 340ms);
-  }
-  .tier-intro .player-row {
-    animation: rowEnter 320ms var(--ease-out) backwards;
-    animation-delay: calc(var(--c) * 80ms + 260ms + var(--r) * 40ms);
+  .tier-intro .player-row,
+  .tier-intro .tier-col-head {
+    animation: rowSettle 620ms var(--ease-open) backwards;
+    animation-delay: calc(var(--c) * 70ms + 220ms);
   }
 
-  /* Al cambiar de modo: lo mismo en versión corta, para no hacer esperar. */
-  .tier-column.tier-swap {
-    animation: tierSwap 160ms ease backwards;
-    animation-delay: calc(var(--c) * 30ms);
+  /* Al cambiar de modo: los encabezados quedan quietos; se cierra una tabla y se abre la otra. */
+  .tier-closing .tier-core { animation: tableClose 200ms cubic-bezier(0.4, 0, 1, 1) forwards; }
+  .tier-swap .tier-core {
+    animation: tableOpen 560ms var(--ease-open) backwards;
+    animation-delay: calc(var(--c) * 40ms);
   }
-  .tier-swap .tier-header {
-    animation: headerDrop 240ms var(--ease-out) backwards;
-    animation-delay: calc(var(--c) * 30ms);
-  }
-  .tier-swap .tier-count {
-    animation: countPop 220ms var(--ease-out) backwards;
-    animation-delay: calc(var(--c) * 30ms + 140ms);
-  }
-  .tier-swap .player-row {
-    animation: rowEnter 220ms var(--ease-out) backwards;
-    animation-delay: calc(var(--c) * 30ms + 80ms + var(--r) * 20ms);
+  .tier-swap .player-row,
+  .tier-swap .tier-col-head {
+    animation: rowSettle 460ms var(--ease-open) backwards;
+    animation-delay: calc(var(--c) * 40ms + 40ms);
   }
 
   .sk-col { animation: fadeOnly 180ms ease backwards; }
@@ -778,17 +734,17 @@
     nav.mode-tabs,
     .mode-tab,
     .tab-indicator,
-    .tier-column.tier-intro,
-    .tier-column.tier-swap,
-    .tier-intro .player-row,
-    .tier-swap .player-row,
-    .tier-intro .tier-count,
-    .tier-swap .tier-count {
+    .tier-intro .tier-core,
+    .tier-swap .tier-core {
       animation: fadeOnly 200ms ease backwards;
       animation-delay: 0ms !important;
     }
     .tier-intro .tier-header,
-    .tier-swap .tier-header,
+    .tier-intro .player-row,
+    .tier-intro .tier-col-head,
+    .tier-swap .player-row,
+    .tier-swap .tier-col-head,
+    .tier-closing .tier-core,
     .mode-tab.active .mode-icon { animation: none; }
   }
 </style>
@@ -1155,17 +1111,78 @@
     return JSON.stringify(data) + '|' + Array.from(loaSet).sort().join(',');
   }
 
+  // Datos ya descargados de cada modo: al cambiar de pestaña se muestran al instante
+  // y recién después se comprueba, por detrás, si hay algo nuevo en la planilla.
+  const modeCache = {};
+  const TABLE_CLOSE_MS = 200;
+  const TABLE_OPEN_MS = 700;
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let loadToken = 0;
+
+  function wait(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  // Deja las caras de los jugadores descargadas para que no aparezcan de golpe.
+  function preloadFaces(data) {
+    TIERS.forEach(tier => {
+      data[tier].forEach(p => {
+        new Image().src = 'https://vzge.me/face/64/' + encodeURIComponent(p.ign);
+      });
+    });
+  }
+
+  function storeMode(modeKey, data) {
+    modeCache[modeKey] = { data, time: new Date() };
+    preloadFaces(data);
+  }
+
+  function updatedText(date) {
+    return 'Last updated: ' + date.toLocaleTimeString('en-US');
+  }
+
+  // Dibuja una copia: renderTiers le agrega datos a cada jugador y la firma
+  // debe compararse siempre contra los datos tal como vinieron de la planilla.
+  function showCachedMode(modeKey) {
+    const cached = modeCache[modeKey];
+    lastSig = dataSignature(cached.data);
+    renderTiers(structuredClone(cached.data));
+    statusLine.textContent = updatedText(cached.time);
+  }
+
+  function preloadOtherModes() {
+    Object.keys(SHEETS).forEach(modeKey => {
+      if (modeKey === currentMode || modeCache[modeKey]) return;
+      fetchModeData(modeKey)
+        .then(data => storeMode(modeKey, data))
+        .catch(err => console.error(err));
+    });
+  }
+
   async function loadMode(modeKey) {
     currentMode = modeKey;
+    const token = ++loadToken;
+
+    if (modeCache[modeKey]) {
+      const columns = container.querySelectorAll('.tier-column');
+      if (columns.length && !prefersReducedMotion.matches) {
+        columns.forEach(column => column.classList.add('tier-closing'));
+        await wait(TABLE_CLOSE_MS);
+        if (token !== loadToken) return; // el usuario ya cambió de pestaña
+      }
+      showCachedMode(modeKey);
+      refreshCurrentMode(TABLE_OPEN_MS);
+      return;
+    }
+
     container.innerHTML = skeletonHTML();
     container.setAttribute('aria-busy', 'true');
     statusLine.textContent = '';
     try {
       const data = await fetchModeData(modeKey);
+      storeMode(modeKey, data);
       if (modeKey !== currentMode) return; // el usuario ya cambió de pestaña
-      lastSig = dataSignature(data);
-      renderTiers(data);
-      statusLine.textContent = 'Last updated: ' + new Date().toLocaleTimeString('en-US');
+      showCachedMode(modeKey);
     } catch (err) {
       if (modeKey !== currentMode) return;
       container.setAttribute('aria-busy', 'false');
@@ -1178,17 +1195,21 @@
 
   // Refresco silencioso: solo vuelve a dibujar si los datos cambiaron, así no
   // parpadean los avatares ni se pierde el hover o el aviso "Copied".
-  async function refreshCurrentMode() {
+  // minDelay: espera a que termine la animación antes de cambiar lo que se ve.
+  async function refreshCurrentMode(minDelay = 0) {
     const mode = currentMode;
+    const animationDone = wait(minDelay);
     try {
       const data = await fetchModeData(mode);
+      storeMode(mode, data);
+      await animationDone;
       if (mode !== currentMode) return;
       const sig = dataSignature(data);
       if (sig !== lastSig) {
         lastSig = sig;
-        renderTiers(data);
+        renderTiers(structuredClone(data));
       }
-      statusLine.textContent = 'Last updated: ' + new Date().toLocaleTimeString('en-US');
+      statusLine.textContent = updatedText(modeCache[mode].time);
     } catch (err) {
       console.error(err);
     }
@@ -1211,6 +1232,7 @@
   (async function init() {
     await refreshLOA();
     loadMode(currentMode);
+    preloadOtherModes();
   })();
 
   // Refresca los datos (y la lista de LOA) solos cada 60 segundos para que se
@@ -1261,9 +1283,10 @@
 
     if (!nav) return;
 
+    // Se anota antes que el clic de la pestaña, porque ahora las tablas pueden dibujarse al instante.
     nav.addEventListener('click', e => {
       if (e.target.closest('.mode-tab')) pending = 'tier-swap';
-    });
+    }, true);
 
     // 3) Indicador deslizante de la pestaña activa (transform: translate + scaleX).
     const indicator = document.createElement('span');
